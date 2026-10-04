@@ -1,6 +1,7 @@
 {
   "redirects": [
     { "source": "/02-react", "destination": "https://wattle-chai-react.vercel.app/", "permanent": false },
+    { "source": "/02-react/", "destination": "https://wattle-chai-react.vercel.app/", "permanent": false },
     { "source": "/02-react/:path*", "destination": "https://wattle-chai-react.vercel.app/", "permanent": false }
   ]
 }
