@@ -4,8 +4,8 @@ The class files for Class 1. Everything is built around one made-up café, **Wat
 
 ## Live links
 
-- **Class site (start here):** CLASS_URL
-- **React café:** REACT_URL
+- **Class site (start here):** https://wattle-chai-class.vercel.app
+- **React café:** https://wattle-chai-react.vercel.app
 
 ## What's here
 
