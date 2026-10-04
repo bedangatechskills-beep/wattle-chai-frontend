@@ -61,6 +61,7 @@
     display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 44%);
     gap: 20px; padding: 20px; align-items: start;
   }
+  .codecol { display: grid; gap: 18px; min-width: 0; }
   .sections { display: grid; gap: 18px; min-width: 0; }
   .sec {
     background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
@@ -178,8 +179,10 @@
   #preview { flex: 1 1 auto; width: 100%; border: 0; background: var(--white); min-height: 200px; display: block; }
   .explain {
     flex: none; background: var(--white); border: 1px solid var(--line); border-left: 6px solid var(--gold);
-    border-radius: 12px; padding: 10px 14px; max-height: 34vh; overflow: auto;
+    border-radius: 12px; padding: 10px 14px; font-family: var(--sans);
   }
+  /* under the line you just toggled */
+  .rule .explain { margin: 6px 0 8px; box-shadow: 0 4px 12px rgba(53,35,26,0.1); }
   .explain h2 { font-family: var(--sans); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold-ink); margin-bottom: 4px; }
   .explain p { margin: 0 0 6px; }
   .explain p:last-child { margin-bottom: 0; }
@@ -219,7 +222,7 @@
       margin: 0 -12px; padding-left: 12px; padding-right: 12px;
     }
     #preview { height: 36vh; flex: none; }
-    .explain { max-height: 16vh; font-size: 0.92rem; }
+    .explain { font-size: 0.92rem; }
     .ctrl { padding-left: 6px; }
     .decls { padding-left: 8px; }
     .rule-foot { padding-left: 30px; }
@@ -243,19 +246,23 @@
 </header>
 
 <div class="work">
-  <div class="sections" id="sections"></div>
+  <div class="codecol">
+    <div id="explain-home">
+      <section class="explain" id="explain" aria-live="polite">
+        <h2>What just happened</h2>
+        <div id="explain-body">
+          <p>Every rule below is switched <b>on</b>, so the page looks finished. Untick any line to switch it off and see what it was doing.</p>
+        </div>
+      </section>
+    </div>
+    <div class="sections" id="sections"></div>
+  </div>
 
   <aside class="stage" aria-label="Live preview">
     <div class="browser">
       <div class="browser-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">wattle-and-chai/index.html</span></div>
       <iframe id="preview" title="Live preview of the Wattle and Chai page"></iframe>
     </div>
-    <section class="explain" aria-live="polite">
-      <h2>What just happened</h2>
-      <div id="explain-body">
-        <p>Every rule below is switched <b>on</b>, so the page looks finished. Untick any line to switch it off and see what it was doing.</p>
-      </div>
-    </section>
   </aside>
 </div>
 
@@ -977,6 +984,16 @@
     return "<code>" + esc(r.sel) + "</code>";
   }
   function explain(html) { $("#explain-body").innerHTML = html; }
+  /* Move the "What just happened" box to sit right under the line that was toggled,
+     keeping that line still on screen even if the box was above it before. */
+  function placeExplain(line) {
+    var box = $("#explain");
+    if (!line) { $("#explain-home").appendChild(box); return; }
+    if (line.nextElementSibling === box) return;
+    var before = line.getBoundingClientRect().top;
+    line.parentNode.insertBefore(box, line.nextSibling);
+    window.scrollBy(0, line.getBoundingClientRect().top - before);
+  }
   function p(t, cls) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + t + '</p>'; }
 
   function explainRule(r, on) {
@@ -1013,6 +1030,7 @@
     var t = e.target, act = t.getAttribute("data-act");
     if (!act) return;
     var r = BY_ID[t.getAttribute("data-rule")], i = +t.getAttribute("data-i");
+    placeExplain(t.closest(".decl, .rule-head"));
     if (act === "rule") {
       S.rules[r.id].on = t.checked;
       $("#rule-" + r.id).classList.toggle("off", !t.checked);
@@ -1057,6 +1075,7 @@
 
   $("#reset-all").addEventListener("click", function () {
     S = freshState();
+    placeExplain(null);
     renderSections();
     loadPreview();
     explain(p("Everything is back to the start: every rule is switched on, with its first value.") + p("Untick any line to see what it was doing."));

@@ -111,11 +111,13 @@
   .stage.phone .device { border: 10px solid #2b211b; border-radius: 26px; background: #fff; box-sizing: content-box; }
   #frame { display: block; border: 0; width: 100%; height: 460px; background: #fff; transform-origin: 0 0; }
   .simtag { position: absolute; left: 8px; bottom: 8px; background: rgba(53, 35, 26, .88); color: #fff; font-size: .78rem; padding: 4px 10px; border-radius: 8px; max-width: calc(100% - 16px); }
-  .what { margin: 0 12px 12px; padding: 12px 16px; border-radius: 12px; background: var(--gold-wash); border: 1px solid #f0d58a; }
+  .what { margin: 12px 12px 4px; padding: 12px 16px; border-radius: 12px; background: var(--gold-wash); border: 1px solid #f0d58a; }
   .what h2 { margin: 0 0 6px; font-size: 1.05rem; }
   .what p { margin: 4px 0; }
   .what .head { font-weight: 700; }
   .what .use { color: var(--muted); }
+  /* under the row you just toggled */
+  .code .what { margin: 4px 8px 10px 12px; font-family: var(--sans); font-size: 1rem; box-shadow: 0 4px 12px rgba(53, 35, 26, .1); }
   .what code, .seo code, .ch code { background: rgba(53, 35, 26, .07); padding: 1px 4px; border-radius: 4px; font-size: .92em; }
   .seo { margin: 0 12px 12px; padding: 12px 16px; border-radius: 12px; background: #f3f8f5; border: 1px solid #bcd8c9; font-size: .92rem; }
   .seo h3 { margin: 0 0 6px; font-size: 1rem; font-family: var(--sans); }
@@ -218,6 +220,12 @@
         </div>
         <button type="button" class="btn" id="reset">Reset all</button>
       </div>
+      <div id="what-home">
+        <div class="what" id="whatbox" aria-live="polite">
+          <h2>What just happened</h2>
+          <div id="what"><p>Nothing yet. Tick any box in the code to start.</p><p class="use">Try <b>Remove tag only</b> on the <code>&lt;h1&gt;</code>, then <b>Remove whole element</b>. Spot the difference.</p></div>
+        </div>
+      </div>
       <div id="code" class="code"></div>
     </section>
 
@@ -237,10 +245,6 @@
           </div>
           <span id="simtag" class="simtag" hidden></span>
         </div>
-      </div>
-      <div class="what" aria-live="polite">
-        <h2>What just happened</h2>
-        <div id="what"><p>Nothing yet. Tick any box in the code to start.</p><p class="use">Try <b>Remove tag only</b> on the <code>&lt;h1&gt;</code>, then <b>Remove whole element</b>. Spot the difference.</p></div>
       </div>
       <div id="seopanel" class="seo" hidden></div>
     </section>
@@ -580,6 +584,17 @@
   var badge = document.getElementById("mode");
   var tabTitle = document.getElementById("tabtitle");
   var whatEl = document.getElementById("what");
+  var whatBox = document.getElementById("whatbox");
+
+  /* Move the "What just happened" box to sit right under the row that was toggled,
+     keeping that row still on screen even if the box was above it before. */
+  function placeWhat(row) {
+    if (!row) { document.getElementById("what-home").appendChild(whatBox); return; }
+    if (row.nextElementSibling === whatBox) return;
+    var before = row.getBoundingClientRect().top;
+    row.parentNode.insertBefore(whatBox, row.nextSibling);
+    window.scrollBy(0, row.getBoundingClientRect().top - before);
+  }
   var pending = null, lastTitle = null, keepScroll = 0;
 
   function viewportOn() { return present("viewport"); }
@@ -775,6 +790,7 @@
     if (activeRow) activeRow.classList.remove("active");
     rows.forEach(function (r) { if (r.dataset.owner === key && r !== row) r.classList.remove("active"); });
     if (row) { row.classList.add("active"); flashClass(row); activeRow = row; }
+    placeWhat(row);
   }
 
   codeEl.addEventListener("change", function (e) {
@@ -802,6 +818,7 @@
     codeEl.querySelectorAll("input[type=checkbox]").forEach(function (c) { c.checked = false; });
     if (activeRow) activeRow.classList.remove("active");
     activeRow = null;
+    placeWhat(null);
     pending = null;
     render(null);
     whatEl.innerHTML = "<p class=\"head\">Reset: every tag is back.</p><p>The page is complete again. Pick a box and take something away.</p>";
