@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wattle &amp; Chai · Three ways to add style</title>
+
+  <!--
+    WAY 2: a <style> block in the <head>.
+    The CSS lives in this HTML file, but in one place, not on every tag.
+    It styles every element with class="special" on THIS page only.
+  -->
+  <style>
+    .special {
+      color: #35231a;
+      background: #f2bd3a;
+      padding: 12px;
+      border-radius: 12px;
+    }
+  </style>
+
+  <!--
+    WAY 3: an external CSS file, linked with <link>.
+    rel="stylesheet" says "this file is CSS". href is the path to it.
+    Every page that links 04-style.css gets the same look.
+  -->
+  <link rel="stylesheet" href="04-style.css">
+</head>
+<body>
+
+  <h1>Three ways to add style</h1>
+
+  <!--
+    WAY 1: inline style, written in a style="" attribute on one tag.
+    It only styles THIS one element. To change ten cards, you edit ten tags.
+  -->
+  <p style="color: #75604f; background: #fbf6ea; padding: 12px; border-radius: 12px;">
+    Way 1 (inline): Flat White — $5.50
+  </p>
+
+  <!-- WAY 2 in action: this paragraph uses the .special rule from the <style> block above. -->
+  <p class="special">Way 2 (style block): Masala Chai — $5.00</p>
+
+  <!-- WAY 3 in action: this paragraph uses the .menu-item rule from 04-style.css. -->
+  <p class="menu-item">Way 3 (external file): Chicken Momo — $16.00</p>
+
+  <!--
+    Why external CSS (way 3) wins:
+    - One file styles every page. Change a colour once, and the whole site changes.
+    - HTML stays about structure, CSS stays about style. Each file has one job.
+    - The browser downloads the CSS file once and remembers it, so pages load faster.
+    Inline style is fine for a quick test. Real sites use external .css files,
+    like styles.css in the 01-html-css-js café page.
+  -->
+
+</body>
+</html>

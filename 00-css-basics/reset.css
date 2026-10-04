@@ -1,0 +1,54 @@
+/*
+  A small modern CSS reset.
+  Every browser adds its own default styles (margins, sizes, fonts). They are a little
+  different in Chrome, Safari and Firefox. A reset clears the messy parts, so our
+  styles.css starts from the same place everywhere.
+*/
+
+/* 1. Make width and height include padding and border.
+      Without this, a 200px box with 20px padding becomes 240px wide. With it, it stays 200px.
+      *, *::before, *::after means "every element, plus the extra bits CSS can add before and after". */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 2. Remove the default margins on everything (headings, paragraphs, lists, body).
+      We add the spacing we want ourselves in styles.css. */
+* {
+  margin: 0;
+}
+
+/* 3. Easier-to-read text: more space between lines than the default. */
+body {
+  line-height: 1.5;
+}
+
+/* 4. Images never spill out of their box.
+      max-width: 100% = never wider than the space they are in.
+      height: auto    = keep the shape (don't squash) when the width shrinks.
+      display: block  = no odd little gap under the image. */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 5. Form controls use the page's font. By default, buttons and inputs use a
+      small system font that doesn't match the rest of the page. "inherit" = copy it from the parent. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* 6. Long words wrap to the next line instead of running off a phone screen. */
+p,
+h1,
+h2,
+h3 {
+  overflow-wrap: break-word;
+}

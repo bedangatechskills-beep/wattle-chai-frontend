@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class 1 · HTML, CSS &amp; JavaScript</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Same design tokens as the café page (01-html-css-js/styles.css) */
+    :root {
+      --color-brand: #d18f00;
+      --color-brand-text: #2e1c10;
+      --color-bg: #fbf6ea;
+      --color-surface: #ffffff;
+      --color-text: #35231a;
+      --color-muted: #75604f;
+      --color-border: #ece2cf;
+      --color-veg: #4f8a6e;
+      --radius: 16px;
+      --shadow: 0 4px 14px rgba(59, 36, 22, 0.08);
+      --shadow-hover: 0 14px 30px rgba(59, 36, 22, 0.16);
+      --font-heading: "Fraunces", Georgia, "Times New Roman", serif;
+      --font-body: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-brand: #f2bd3a;
+        --color-brand-text: #1c130d;
+        --color-bg: #1c140f;
+        --color-surface: #2a1f18;
+        --color-text: #f5e9da;
+        --color-muted: #c2ab96;
+        --color-border: #3d2f25;
+        --color-veg: #8cc4a8;
+        --shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        --shadow-hover: 0 14px 30px rgba(0, 0, 0, 0.5);
+      }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-body);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+    header { padding: 64px 0 32px; }
+    .kicker {
+      display: inline-block;
+      background: var(--color-brand);
+      color: var(--color-brand-text);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+    }
+    .lead { color: var(--color-muted); font-size: 1.1rem; margin-top: 12px; max-width: 60ch; }
+    h2 {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      margin: 40px 0 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      color: inherit;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover, .card:focus-visible { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .card:focus-visible { outline: 3px solid var(--color-brand); outline-offset: 2px; }
+    .card .icon { font-size: 1.8rem; }
+    .card h3 { font-family: var(--font-heading); font-size: 1.15rem; }
+    .card p { color: var(--color-muted); font-size: 0.95rem; }
+    .card .go { margin-top: auto; color: var(--color-brand); font-weight: 600; font-size: 0.9rem; }
+    .tag {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-veg);
+      border: 1px solid var(--color-veg);
+      border-radius: 999px;
+      padding: 1px 8px;
+    }
+    .lessons { list-style: none; padding: 0; display: grid; gap: 4px; margin-top: 4px; }
+    .lessons a { color: var(--color-text); }
+    .lessons a:hover { color: var(--color-brand); }
+    footer { color: var(--color-muted); font-size: 0.9rem; padding: 48px 0 40px; }
+    footer a { color: inherit; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="kicker">☕ Wattle &amp; Chai</span>
+      <h1>Class 1 · HTML, CSS &amp; JavaScript</h1>
+      <p class="lead">Everything we use in class today: two games to play with, the lessons, the café page, and the same café built with React.</p>
+    </header>
+
+    <main>
+      <h2>Play first</h2>
+      <div class="grid">
+        <a class="card" href="games/html-toggles.html">
+          <span class="icon">🧱</span>
+          <h3>HTML toggles</h3>
+          <p>Take parts of the HTML away and watch the café page change.</p>
+          <span class="go">Open game →</span>
+        </a>
+        <a class="card" href="games/css-toggles.html">
+          <span class="icon">🎨</span>
+          <h3>CSS toggles</h3>
+          <p>Tick and untick lines of CSS, like the Styles panel in DevTools.</p>
+          <span class="go">Open game →</span>
+        </a>
+      </div>
+
+      <h2>Lessons</h2>
+      <div class="grid">
+        <div class="card">
+          <span class="icon">📄</span>
+          <h3>HTML basics</h3>
+          <p>Four small pages, one idea each.</p>
+          <ul class="lessons">
+            <li><a href="00-html-basics/01-first-page.html">01 · My first page</a></li>
+            <li><a href="00-html-basics/02-elements.html">02 · Elements</a></li>
+            <li><a href="00-html-basics/03-images.html">03 · Images</a></li>
+            <li><a href="00-html-basics/04-styling-in-html.html">04 · Three ways to add style</a></li>
+          </ul>
+        </div>
+        <a class="card" href="00-css-basics/index.html">
+          <span class="icon">✨</span>
+          <h3>CSS basics</h3>
+          <p>Selectors, colours, spacing and layout on one café page.</p>
+          <span class="go">Open lesson →</span>
+        </a>
+      </div>
+
+      <h2>The café</h2>
+      <div class="grid">
+        <a class="card" href="01-html-css-js/">
+          <span class="tag">HTML + CSS + JS</span>
+          <h3>Wattle &amp; Chai café page</h3>
+          <p>A real menu page in three files. Add to your order, switch the theme, then open DevTools and find the three layers.</p>
+          <span class="go">Open the café →</span>
+        </a>
+        <a class="card" href="REACT_URL">
+          <span class="tag">React</span>
+          <h3>The same café, built with React</h3>
+          <p>Same look, same order badge, built from components. Compare it with the plain version.</p>
+          <span class="go">Open the React café →</span>
+        </a>
+      </div>
+    </main>
+
+    <footer>
+      Want the files? Download or clone them from
+      <a href="https://github.com/bedangatechskills-beep/wattle-chai-frontend">GitHub</a>
+      and open the folder in VS Code.
+    </footer>
+  </div>
+</body>
+</html>

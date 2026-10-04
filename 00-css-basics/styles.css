@@ -1,0 +1,121 @@
+/*
+  Our design for the CSS basics page. reset.css loads first, then this file.
+  Open DevTools → Elements → Styles to see each rule, and change values live.
+*/
+
+/* ---- 1. Rule anatomy ----
+   selector { property: value; }
+
+   body              <- SELECTOR: which elements to style
+   {                 <- the rule starts
+     color: #35231a; <- a DECLARATION: PROPERTY (color) : VALUE (#35231a) ; (semicolon ends it)
+   }                 <- the rule ends
+*/
+body {
+  color: #35231a;
+  background: #fbf6ea;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  padding: 24px;
+}
+
+/* ---- 2. Element selectors: style EVERY element of that type ---- */
+h2 {
+  margin-top: 32px;
+  margin-bottom: 8px;
+}
+
+p {
+  margin-bottom: 12px;
+  color: #75604f;
+}
+
+/* ---- 3. Class selectors: start with a dot. Style every element with that class. ---- */
+.site-header {
+  padding: 24px;
+  margin-bottom: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+.tagline {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+
+.hero-img {
+  border-radius: 16px;
+}
+
+.menu-list {
+  padding-left: 20px;
+}
+
+/* ---- 4. Id selector: starts with #. Styles the ONE element with that id. ----
+   An id can only be used once per page. Classes can be used many times.
+   Most of the time we style with classes; ids are handy for links and JavaScript. */
+#cafe-name {
+  color: #d18f00;
+}
+
+/* ---- 5. Colours: three ways to write them ---- */
+.btn {
+  color: white;                    /* a colour NAME */
+  background: #d18f00;             /* HEX: #RRGGBB, red-green-blue from 00 to ff */
+  border: 2px solid rgb(53, 35, 26);  /* RGB: red, green, blue from 0 to 255 */
+  padding: 10px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* ---- 6. Fonts ----
+   font-family is a LIST. If the first font is missing, the browser tries the next.
+   The last one (serif / sans-serif) is a general family every computer has. */
+h1,
+h2 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+h1 {
+  font-size: 2.5rem;   /* rem = times the normal text size (usually 16px), so 2.5rem = 40px */
+}
+
+/* ---- 7. Which rule wins? ----
+   All three rules below match <p class="price" id="special-price">. Each sets a colour.
+   - p           = element selector (weakest)  — also from section 2
+   - .price      = class selector (stronger)
+   - #special-price = id selector (strongest)  → this one wins: the text is green.
+   Untick the #special-price colour in DevTools: now .price wins (gold). */
+.price {
+  color: #d18f00;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+#special-price {
+  color: rgb(79, 138, 110);
+}
+
+/* When two rules are EQUALLY strong, the one LOWER in the file wins.
+   Both are class selectors, so this later font-size beats the 1.3rem above. */
+.price {
+  font-size: 1.5rem;
+}
+
+/* ---- 8. The box model ----
+   Every element is a box, from inside to outside:
+   content → padding (space inside) → border (the line) → margin (space outside).
+   Because reset.css sets box-sizing: border-box, the total width stays 300px:
+   300 = content + 2 × 20px padding + 2 × 4px border. */
+.box-demo {
+  width: 300px;
+  padding: 20px;
+  border: 4px dashed #d18f00;
+  margin: 24px 0;
+  background: #ffffff;
+}
+
+.site-footer {
+  margin-top: 40px;
+  font-size: 0.9rem;
+}

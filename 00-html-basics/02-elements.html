@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wattle &amp; Chai · Elements</title>
+</head>
+<body>
+
+  <!--
+    An ELEMENT = opening tag + content + closing tag.
+        <h1>Wattle & Chai</h1>
+        ^^^^ opening tag    ^^^^^ closing tag (note the /)
+    The words in between are the CONTENT.
+  -->
+
+  <!-- Headings: h1 is the biggest and most important. One h1 per page. -->
+  <h1>Wattle &amp; Chai</h1>
+
+  <!-- h2 = a section heading. A page can have many. -->
+  <h2>About the café</h2>
+
+  <!-- <strong> = important (shows bold). <em> = stress, like when you say a word louder (shows italic). -->
+  <p>We serve <strong>locally roasted coffee</strong> and the <em>best</em> momos in Fitzroy.</p>
+
+  <!--
+    A link uses <a>. href is an ATTRIBUTE: extra information inside the opening tag, written name="value".
+    target="_blank" opens the link in a new tab.
+  -->
+  <p>Find us on the map: <a href="https://www.openstreetmap.org/search?query=Brunswick%20Street%20Fitzroy" target="_blank">Brunswick Street, Fitzroy</a></p>
+
+  <h2>Today's menu</h2>
+
+  <!-- h3 = a smaller heading inside a section -->
+  <h3>Drinks</h3>
+
+  <!-- <ul> = unordered list (dot points). Each item goes in an <li> (list item). -->
+  <ul>
+    <li>Flat White — $5.50</li>
+    <li>Masala Chai — $5.00</li>
+  </ul>
+
+  <h3>How we make a flat white</h3>
+
+  <!-- <ol> = ordered list (numbered). Use it when the order matters. -->
+  <ol>
+    <li>Pull a double shot of espresso.</li>
+    <li>Steam the milk until it is silky.</li>
+    <li>Pour the milk over the coffee.</li>
+  </ol>
+
+  <!-- A button DOES something on the page. (This one does nothing yet. JavaScript will make it work later.) -->
+  <button type="button">Add to order</button>
+
+  <!--
+    NESTING: elements go inside other elements, like boxes inside boxes.
+    Close the inner one first:  <p><strong>...</strong></p>   ✔
+                                <p><strong>...</p></strong>   ✘
+  -->
+  <h2>Visit us</h2>
+  <ul>
+    <li><strong>Address:</strong> Brunswick Street, Fitzroy VIC 3065</li>
+    <li><strong>Hours:</strong> Mon–Sun 7am – 4pm</li>
+  </ul>
+
+</body>
+</html>

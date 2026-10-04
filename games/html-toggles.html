@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML toggles · Wattle &amp; Chai</title>
+<style>
+  :root {
+    --bg: #fbf6ea;
+    --surface: #ffffff;
+    --text: #35231a;
+    --muted: #75604f;
+    --border: #ece2cf;
+    --gold: #d18f00;
+    --gold-soft: #f2bd3a;
+    --gold-wash: #fff4d6;
+    --green: #4f8a6e;
+    --green-wash: #e7f2ec;
+    --red: #b4432f;
+    --mono: "Cascadia Code", Consolas, "Courier New", monospace;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.5; }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
+  a { color: #8a5a00; }
+  button, input, textarea { font: inherit; }
+  code, .mono { font-family: var(--mono); }
+
+  /* ---- Top header ---- */
+  .top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--surface); border-bottom: 3px solid var(--gold); }
+  .top h1 { margin: 0; font-size: 1.7rem; }
+  .top h1 span { color: var(--gold); }
+  .top p { margin: 4px 0 0; color: var(--muted); }
+  .other { display: inline-block; padding: 10px 16px; border: 2px solid var(--gold); border-radius: 999px; text-decoration: none; font-weight: 600; color: var(--text); }
+  .other:hover, .other:focus-visible { background: var(--gold-wash); }
+
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 16px 24px 48px; }
+
+  /* ---- Legend ---- */
+  .legend { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px; }
+  .legend h2 { margin: 0 0 8px; font-size: 1.15rem; }
+  .legend ul { margin: 0; padding-left: 20px; }
+  .legend li { margin: 4px 0; }
+  .anatomy { display: grid; grid-template-columns: repeat(5, auto); justify-content: start; font-family: var(--mono); font-size: 1.05rem; row-gap: 2px; overflow-x: auto; padding-bottom: 4px; }
+  .anatomy .c { padding: 6px 2px; white-space: pre; }
+  .c-tag { color: #8a4b14; font-weight: 700; }
+  .c-attr { color: var(--green); background: var(--green-wash); border-radius: 4px; }
+  .c-content { color: var(--text); background: var(--gold-wash); border-radius: 4px; }
+  .brk { font-family: var(--sans); font-size: .8rem; text-align: center; border-top: 2px solid currentColor; margin: 2px 4px 0; padding-top: 2px; position: relative; white-space: nowrap; }
+  .brk::before, .brk::after { content: ""; position: absolute; top: -8px; width: 2px; height: 8px; background: currentColor; }
+  .brk::before { left: -2px; } .brk::after { right: -2px; }
+  .b-open { color: #8a4b14; } .b-attr { color: var(--green); } .b-content { color: #8a5a00; } .b-close { color: #8a4b14; } .b-el { color: var(--text); font-weight: 700; }
+
+  /* ---- Game layout ---- */
+  .game { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; margin-top: 16px; align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+  .colhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .colhead h2 { margin: 0; font-size: 1.2rem; }
+  .colhead p { margin: 2px 0 0; font-size: .9rem; color: var(--muted); }
+  .btn { min-height: 44px; padding: 8px 16px; border-radius: 10px; border: 2px solid var(--text); background: var(--surface); color: var(--text); font-weight: 600; cursor: pointer; }
+  .btn:hover, .btn:focus-visible { background: var(--gold-wash); }
+
+  /* code rows */
+  .code { font-family: var(--mono); font-size: .92rem; }
+  .row { border-left: 4px solid transparent; padding: 3px 12px 3px 8px; }
+  .row.ctl-row { padding-top: 6px; padding-bottom: 6px; border-top: 1px dashed var(--border); }
+  .row.active { background: var(--gold-wash); border-left-color: var(--gold); }
+  .row.flash { animation: rowflash 1.2s ease-out; }
+  @keyframes rowflash { from { background: #ffe39a; } to { background: var(--gold-wash); } }
+  .ln { display: block; white-space: pre-wrap; word-break: break-word; tab-size: 2; }
+  .tg { color: #8a4b14; font-weight: 700; }
+  .an { color: var(--green); }
+  .av { color: #9a5b00; }
+  .cm { color: #8d7a68; font-style: italic; }
+  .css { color: #5b4a3e; }
+  .gone { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; opacity: .45; }
+  .edited { background: #ffd8cf; border-radius: 3px; }
+  .ctls { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 6px 0 2px; font-family: var(--sans); font-size: .88rem; }
+  .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 10px; background: #fffdf8; }
+  .chip { font-family: var(--mono); font-weight: 700; color: #8a4b14; padding: 0 4px; }
+  .tog { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 4px 10px 4px 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; user-select: none; }
+  .tog:hover { border-color: var(--gold); }
+  .tog input { width: 22px; height: 22px; margin: 0; accent-color: var(--red); cursor: pointer; }
+  .tog:has(input:checked) { background: #fde9e4; border-color: var(--red); }
+  .tog.attr input { accent-color: var(--red); }
+  .tog:has(input:focus-visible) { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  /* preview column */
+  .viewcol { position: sticky; top: 8px; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .toolbar .tog { border-color: var(--border); }
+  .toolbar .tog input { accent-color: var(--green); }
+  .toolbar .tog:has(input:checked) { background: var(--green-wash); border-color: var(--green); }
+  .badge { display: inline-flex; align-items: center; min-height: 40px; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: .88rem; background: var(--green-wash); color: #2f5e47; border: 1px solid var(--green); }
+  .badge.quirks { background: #fde9e4; color: var(--red); border-color: var(--red); }
+  .browser { margin: 12px; border: 1px solid #d9ccb4; border-radius: 12px; overflow: hidden; background: #efe6d4; }
+  .tabs { display: flex; padding: 6px 8px 0; }
+  .tab { display: flex; align-items: center; gap: 8px; max-width: 100%; padding: 6px 14px; background: var(--surface); border-radius: 10px 10px 0 0; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tab span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  .tab.flash { animation: tabflash 1.2s ease-out; }
+  @keyframes tabflash { from { background: #ffe39a; } to { background: var(--surface); } }
+  .addr { background: var(--surface); padding: 4px 12px 6px; font-size: .8rem; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .addr span { display: inline-block; padding: 2px 10px; background: #f6f0e4; border-radius: 999px; }
+  .stage { position: relative; background: #ffffff; overflow: hidden; }
+  .stage.flash { animation: stageflash 1.2s ease-out; }
+  @keyframes stageflash { from { box-shadow: inset 0 0 0 4px var(--gold-soft); } to { box-shadow: inset 0 0 0 4px transparent; } }
+  .stage.phone { background: #e7dcc8; padding: 16px 0; display: flex; justify-content: center; }
+  .device { position: relative; overflow: hidden; }
+  .stage.phone .device { border: 10px solid #2b211b; border-radius: 26px; background: #fff; box-sizing: content-box; }
+  #frame { display: block; border: 0; width: 100%; height: 460px; background: #fff; transform-origin: 0 0; }
+  .simtag { position: absolute; left: 8px; bottom: 8px; background: rgba(53, 35, 26, .88); color: #fff; font-size: .78rem; padding: 4px 10px; border-radius: 8px; max-width: calc(100% - 16px); }
+  .what { margin: 0 12px 12px; padding: 12px 16px; border-radius: 12px; background: var(--gold-wash); border: 1px solid #f0d58a; }
+  .what h2 { margin: 0 0 6px; font-size: 1.05rem; }
+  .what p { margin: 4px 0; }
+  .what .head { font-weight: 700; }
+  .what .use { color: var(--muted); }
+  .what code, .seo code, .ch code { background: rgba(53, 35, 26, .07); padding: 1px 4px; border-radius: 4px; font-size: .92em; }
+  .seo { margin: 0 12px 12px; padding: 12px 16px; border-radius: 12px; background: #f3f8f5; border: 1px solid #bcd8c9; font-size: .92rem; }
+  .seo h3 { margin: 0 0 6px; font-size: 1rem; font-family: var(--sans); }
+  .seo h4 { margin: 10px 0 4px; font-size: .9rem; font-family: var(--sans); color: #2f5e47; }
+  .seo ul { margin: 0; padding-left: 18px; }
+  .seo li { margin: 2px 0; }
+  .seo .warn { color: var(--red); font-weight: 600; }
+  .seo .serp { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
+  .seo .serp b { color: #1a0dab; font-weight: 400; font-size: 1.05rem; }
+  .seo .note { color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+
+  /* ---- Challenges ---- */
+  .challenges { margin-top: 28px; }
+  .challenges > h2 { margin: 0 0 4px; }
+  .challenges > p { margin: 0 0 12px; color: var(--muted); }
+  .chgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+  .ch { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 16px; }
+  .ch h3 { margin: 0 0 4px; font-size: 1.05rem; }
+  .ch p { margin: 4px 0 8px; }
+  .ch textarea { width: 100%; min-height: 96px; padding: 10px; font-family: var(--mono); font-size: .95rem; border: 2px solid var(--border); border-radius: 10px; background: #fffdf8; color: var(--text); resize: vertical; }
+  .ch textarea:focus { outline: none; border-color: var(--gold); }
+  .ch .mini { display: block; width: 100%; height: 150px; border: 1px dashed #d9ccb4; border-radius: 10px; margin-top: 8px; background: #fff; }
+  .ch .fb { margin: 8px 0 4px; padding: 8px 12px; border-radius: 10px; font-weight: 600; background: #f6f0e4; }
+  .ch .fb.ok { background: var(--green-wash); color: #2f5e47; }
+  .ch .fb.no { background: #fdf1dc; color: #7a4a00; }
+  .ch details { margin-top: 6px; font-size: .92rem; }
+  .ch summary { cursor: pointer; color: var(--muted); min-height: 32px; }
+  .ch pre { margin: 6px 0 0; padding: 8px 10px; background: #f6f0e4; border-radius: 8px; white-space: pre-wrap; font-family: var(--mono); }
+  .lbl { font-size: .85rem; color: var(--muted); font-weight: 600; }
+
+  @media (max-width: 960px) {
+    .game, .legend { grid-template-columns: minmax(0, 1fr); }
+    .viewcol { position: static; }
+  }
+  @media (max-width: 560px) {
+    .top { padding: 12px 16px; }
+    .wrap { padding: 12px 16px 40px; }
+    .legend { padding: 12px 14px; }
+    .anatomy { font-size: .9rem; }
+    .row { padding-right: 8px; }
+    .browser, .what, .seo { margin-left: 8px; margin-right: 8px; }
+    #frame { height: 400px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1>HTML <span>toggles</span></h1>
+    <p>Tick a box to take part of the code away. Watch the café page change, then read “What just happened”.</p>
+  </div>
+  <a class="other" href="css-toggles.html">Next: CSS toggles →</a>
+</header>
+
+<div class="wrap">
+
+  <section class="legend" aria-labelledby="legend-h">
+    <div>
+      <h2 id="legend-h">One element, four parts</h2>
+      <div class="anatomy" aria-label="Diagram: an a element. Opening tag a href equals hash menu, content See the menu, closing tag slash a.">
+        <span class="c c-tag">&lt;a </span>
+        <span class="c c-attr">href="#menu"</span>
+        <span class="c c-tag">&gt;</span>
+        <span class="c c-content">See the menu</span>
+        <span class="c c-tag">&lt;/a&gt;</span>
+
+        <span></span>
+        <span class="brk b-attr">attribute</span>
+        <span></span>
+        <span></span>
+        <span></span>
+
+        <span class="brk b-open" style="grid-column: 1 / 4">opening tag</span>
+        <span class="brk b-content">content</span>
+        <span class="brk b-close">closing tag</span>
+
+        <span class="brk b-el" style="grid-column: 1 / 6">element = opening tag + content + closing tag</span>
+      </div>
+    </div>
+    <div>
+      <h2>How to play</h2>
+      <ul>
+        <li><b>Tag</b> = the name in angle brackets, like <code>&lt;p&gt;</code>. It tells the browser what something is.</li>
+        <li><b>Remove tag only</b> keeps the words but loses the tag. You see what the <b>tag</b> gives.</li>
+        <li><b>Remove whole element</b> takes the tag <b>and</b> its content away.</li>
+        <li><b>Attribute</b> = extra information inside the opening tag, <code>name="value"</code>.</li>
+        <li><b>Nesting</b>: elements sit inside elements. The indents in the code show it.</li>
+        <li><code>&lt;img&gt;</code> and <code>&lt;meta&gt;</code> have no content, so no closing tag.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="game">
+    <section class="panel codecol" aria-labelledby="code-h">
+      <div class="colhead">
+        <div>
+          <h2 id="code-h">The code</h2>
+          <p>A small Wattle &amp; Chai page. <span class="gone" style="opacity:1">Struck-out</span> code = the browser no longer gets it.</p>
+        </div>
+        <button type="button" class="btn" id="reset">Reset all</button>
+      </div>
+      <div id="code" class="code"></div>
+    </section>
+
+    <section class="panel viewcol" aria-labelledby="view-h">
+      <h2 id="view-h" class="colhead" style="margin:0;font-size:1.2rem">The page</h2>
+      <div class="toolbar">
+        <label class="tog"><input type="checkbox" id="phone"> 📱 Phone view</label>
+        <label class="tog"><input type="checkbox" id="seo"> What Google &amp; screen readers see</label>
+        <span id="mode" class="badge" title="Read live from the preview: document.compatMode">Browser mode: Standards</span>
+      </div>
+      <div class="browser">
+        <div class="tabs"><div class="tab" id="tab"><span aria-hidden="true">🌐</span><span id="tabtitle">…</span></div></div>
+        <div class="addr"><span>index.html</span></div>
+        <div id="stage" class="stage">
+          <div id="device" class="device">
+            <iframe id="frame" title="Live preview of the café page" sandbox="allow-same-origin"></iframe>
+          </div>
+          <span id="simtag" class="simtag" hidden></span>
+        </div>
+      </div>
+      <div class="what" aria-live="polite">
+        <h2>What just happened</h2>
+        <div id="what"><p>Nothing yet. Tick any box in the code to start.</p><p class="use">Try <b>Remove tag only</b> on the <code>&lt;h1&gt;</code>, then <b>Remove whole element</b>. Spot the difference.</p></div>
+      </div>
+      <div id="seopanel" class="seo" hidden></div>
+    </section>
+  </div>
+
+  <section class="challenges" aria-labelledby="ch-h">
+    <h2 id="ch-h">Now type it</h2>
+    <p>Type the HTML yourself. The little page under each box updates as you type.</p>
+    <div class="chgrid" id="chgrid"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Images (inlined so the game is one file) ---------- */
+  var HERO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAwIDYwMCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIj4KICA8dGl0bGU+QSBmbGF0IHdoaXRlIHdpdGggbGF0dGUgYXJ0IG9uIGEgY2Fmw6kgdGFibGU8L3RpdGxlPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJ3YWxsIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZiZjZlYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmMWUyYzQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InRhYmxlIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2M5OWE2YiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNhODdhNGUiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImNvZmZlZSIgY3g9IjAuNSIgY3k9IjAuNSIgcj0iMC42Ij4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjYzg5MjVjIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzhmNTUzMCIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICAgIDxnIGlkPSJ3YXR0bGUiPgogICAgICA8Y2lyY2xlIHI9IjExIiBmaWxsPSIjZjJiZDNhIi8+CiAgICAgIDxjaXJjbGUgY3g9IjE2IiBjeT0iLTgiIHI9IjkiIGZpbGw9IiNlMGExMDAiLz4KICAgICAgPGNpcmNsZSBjeD0iNCIgY3k9Ii0yMCIgcj0iOCIgZmlsbD0iI2Y3Y2Y1YyIvPgogICAgPC9nPgogIDwvZGVmcz4KCiAgPCEtLSB3YWxsIGFuZCB0YWJsZSAtLT4KICA8cmVjdCB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2MDAiIGZpbGw9InVybCgjd2FsbCkiLz4KICA8cmVjdCB5PSI1MDAiIHdpZHRoPSIxMjAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0idXJsKCN0YWJsZSkiLz4KICA8cGF0aCBkPSJNMCA1NDAgSDEyMDAgTTAgNTc1IEgxMjAwIiBzdHJva2U9IiM5YTZjNDMiIHN0cm9rZS13aWR0aD0iMyIgb3BhY2l0eT0iMC40Ii8+CgogIDwhLS0gd2F0dGxlIHNwcmlncyBpbiB0aGUgY29ybmVycyAtLT4KICA8cGF0aCBkPSJNMCAxMjAgQzEyMCAxMTAgMjAwIDcwIDI2MCAxMCIgc3Ryb2tlPSIjNWY4YTVhIiBzdHJva2Utd2lkdGg9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik05MCAxMTAgQzExMCA4MCAxNTAgNzAgMTgwIDc1IE0xNzAgNjAgQzE4MCA0MCAyMTAgMzAgMjM1IDM1IiBzdHJva2U9IiM1ZjhhNWEiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPHVzZSBocmVmPSIjd2F0dGxlIiB4PSI2MCIgeT0iOTUiLz4KICA8dXNlIGhyZWY9IiN3YXR0bGUiIHg9IjE0MCIgeT0iNzAiLz4KICA8dXNlIGhyZWY9IiN3YXR0bGUiIHg9IjIwMCIgeT0iNDUiLz4KICA8dXNlIGhyZWY9IiN3YXR0bGUiIHg9IjI0NSIgeT0iMjAiLz4KICA8dXNlIGhyZWY9IiN3YXR0bGUiIHg9IjE4NSIgeT0iOTUiLz4KICA8cGF0aCBkPSJNMTIwMCAxNjAgQzEwODAgMTUwIDEwMDAgMTAwIDk1MCAyMCIgc3Ryb2tlPSIjNWY4YTVhIiBzdHJva2Utd2lkdGg9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0xMTEwIDE1MCBDMTA5MCAxMjAgMTA1MCAxMTAgMTAyMCAxMTUiIHN0cm9rZT0iIzVmOGE1YSIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8dXNlIGhyZWY9IiN3YXR0bGUiIHg9IjExNDAiIHk9IjE0MCIvPgogIDx1c2UgaHJlZj0iI3dhdHRsZSIgeD0iMTA2MCIgeT0iMTEwIi8+CiAgPHVzZSBocmVmPSIjd2F0dGxlIiB4PSIxMDAwIiB5PSI3MCIvPgogIDx1c2UgaHJlZj0iI3dhdHRsZSIgeD0iOTY1IiB5PSIzNSIvPgogIDx1c2UgaHJlZj0iI3dhdHRsZSIgeD0iMTAxNSIgeT0iMTM1Ii8+CgogIDwhLS0gc3RlYW0gLS0+CiAgPGcgc3Ryb2tlPSIjZDZjMmE1IiBzdHJva2Utd2lkdGg9IjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC44Ij4KICAgIDxwYXRoIGQ9Ik01NTUgMjQ1IEM1MzAgMjE1IDU4MCAxOTUgNTU1IDE2MCIvPgogICAgPHBhdGggZD0iTTYwMCAyMzUgQzU3NSAyMDAgNjI4IDE4MCA2MDAgMTM1Ii8+CiAgICA8cGF0aCBkPSJNNjQ1IDI0NSBDNjIwIDIxNSA2NzAgMTk1IDY0NSAxNjAiLz4KICA8L2c+CgogIDwhLS0gc2F1Y2VyIC0tPgogIDxlbGxpcHNlIGN4PSI2MDAiIGN5PSI0NzgiIHJ4PSIyNDAiIHJ5PSI0NCIgZmlsbD0iIzhhNWQzOCIgb3BhY2l0eT0iMC4yNSIvPgogIDxlbGxpcHNlIGN4PSI2MDAiIGN5PSI0NjgiIHJ4PSIyMzUiIHJ5PSI0MiIgZmlsbD0iI2ZmZmZmZiIgc3Ryb2tlPSIjZThkY2M2IiBzdHJva2Utd2lkdGg9IjQiLz4KICA8ZWxsaXBzZSBjeD0iNjAwIiBjeT0iNDYyIiByeD0iMTUwIiByeT0iMjIiIGZpbGw9IiNmNGVkZTAiLz4KCiAgPCEtLSBjdXAgaGFuZGxlIC0tPgogIDxwYXRoIGQ9Ik03NDAgMzMwIEM4NDAgMzE1IDg0NSA0MzAgNzE1IDQyNSIgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8cGF0aCBkPSJNNzQwIDMzMCBDODQwIDMxNSA4NDUgNDMwIDcxNSA0MjUiIHN0cm9rZT0iI2VjZTJjZiIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9IjAuOCIvPgoKICA8IS0tIGN1cCBib2R5IC0tPgogIDxwYXRoIGQ9Ik00NTAgMzAwIEw3NTAgMzAwIEM3NTAgNDAwIDcyMCA0NTggNjUwIDQ2NSBMNTUwIDQ2NSBDNDgwIDQ1OCA0NTAgNDAwIDQ1MCAzMDAgWiIgZmlsbD0iI2ZmZmZmZiIvPgogIDxwYXRoIGQ9Ik02OTAgMzAwIEw3NTAgMzAwIEM3NTAgNDAwIDcyMCA0NTggNjUwIDQ2NSBMNjMwIDQ2NSBDNjkwIDQ0MCA3MDAgMzgwIDY5MCAzMDAgWiIgZmlsbD0iI2VmZTVkNCIvPgoKICA8IS0tIHJpbSwgY29mZmVlIGFuZCBsYXR0ZSBhcnQgLS0+CiAgPGVsbGlwc2UgY3g9IjYwMCIgY3k9IjMwMCIgcng9IjE1MCIgcnk9IjM0IiBmaWxsPSIjZmZmZmZmIiBzdHJva2U9IiNlNmRhYzQiIHN0cm9rZS13aWR0aD0iNCIvPgogIDxlbGxpcHNlIGN4PSI2MDAiIGN5PSIzMDIiIHJ4PSIxMzYiIHJ5PSIyNyIgZmlsbD0idXJsKCNjb2ZmZWUpIi8+CiAgPHBhdGggZD0iTTYwMCAzMjQgQzUzOCAzMDYgNTQzIDI4MiA1NzEgMjgzIEM1ODggMjg0IDU5OCAyOTIgNjAwIDI5OSBDNjAyIDI5MiA2MTIgMjg0IDYyOSAyODMgQzY1NyAyODIgNjYyIDMwNiA2MDAgMzI0IFoiIGZpbGw9IiNmYmYxZTAiLz4KICA8cGF0aCBkPSJNNjAwIDI5OSBMNjAwIDMxOCIgc3Ryb2tlPSIjZDliNDhhIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K";
+  var MOMO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MDAgNDAwIiB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCI+CiAgPHRpdGxlPkEgcGxhdGUgb2Ygc3RlYW1lZCBtb21vcyB3aXRoIHRvbWF0byBhY2hhcjwvdGl0bGU+CiAgPGRlZnM+CiAgICA8ZyBpZD0ibW9tbyI+CiAgICAgIDxwYXRoIGQ9Ik0tNjIgMjUgQy02OCAtMjAgLTIyIC01NiAwIC02MiBDMjIgLTU2IDY4IC0yMCA2MiAyNSBDMzIgNDIgLTMyIDQyIC02MiAyNSBaIiBmaWxsPSIjZmRmOGVlIiBzdHJva2U9IiNlM2QzYjgiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgICA8cGF0aCBkPSJNMCAtNjAgQy02IC0zNSAtMTggLTE1IC0zNCA1IE0wIC02MCBDLTIgLTMyIC02IC0xMCAtMTIgMTIgTTAgLTYwIEMyIC0zMiA2IC0xMCAxMiAxMiBNMCAtNjAgQzYgLTM1IDE4IC0xNSAzNCA1IiBzdHJva2U9IiNlM2QzYjgiIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgICAgIDxlbGxpcHNlIGN4PSItMzAiIGN5PSIxOCIgcng9IjE0IiByeT0iNiIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC44Ii8+CiAgICA8L2c+CiAgPC9kZWZzPgoKICA8cmVjdCB3aWR0aD0iNjAwIiBoZWlnaHQ9IjQwMCIgcng9IjI0IiBmaWxsPSIjZjZlZmUyIi8+CgogIDwhLS0gcGxhdGUgLS0+CiAgPGVsbGlwc2UgY3g9IjMwMCIgY3k9IjI0NSIgcng9IjI1MCIgcnk9IjExNSIgZmlsbD0iIzhhNWQzOCIgb3BhY2l0eT0iMC4xOCIvPgogIDxlbGxpcHNlIGN4PSIzMDAiIGN5PSIyMzUiIHJ4PSIyNDUiIHJ5PSIxMTIiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2U4ZGNjNiIgc3Ryb2tlLXdpZHRoPSI0Ii8+CiAgPGVsbGlwc2UgY3g9IjMwMCIgY3k9IjIzMiIgcng9IjE4NSIgcnk9Ijc4IiBmaWxsPSIjZmFmNWVjIi8+CgogIDwhLS0gdG9tYXRvIGFjaGFyIGJvd2wgLS0+CiAgPGVsbGlwc2UgY3g9IjQ1NSIgY3k9IjIwNSIgcng9IjUyIiByeT0iMjQiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iI2UzZDNiOCIgc3Ryb2tlLXdpZHRoPSIzIi8+CiAgPGVsbGlwc2UgY3g9IjQ1NSIgY3k9IjIwMyIgcng9IjQyIiByeT0iMTciIGZpbGw9IiNjODQ0MmIiLz4KICA8ZWxsaXBzZSBjeD0iNDQ1IiBjeT0iMTk5IiByeD0iMTIiIHJ5PSI1IiBmaWxsPSIjZTA2NjRiIi8+CgogIDwhLS0gbW9tb3MsIGJhY2sgcm93IHRoZW4gZnJvbnQgcm93IC0tPgogIDx1c2UgaHJlZj0iI21vbW8iIHg9IjIwMCIgeT0iMjA1Ii8+CiAgPHVzZSBocmVmPSIjbW9tbyIgeD0iMzIwIiB5PSIxOTUiLz4KICA8dXNlIGhyZWY9IiNtb21vIiB4PSIxNDAiIHk9IjI2MCIvPgogIDx1c2UgaHJlZj0iI21vbW8iIHg9IjI2MCIgeT0iMjcwIi8+CiAgPHVzZSBocmVmPSIjbW9tbyIgeD0iMzgwIiB5PSIyNjUiLz4KCiAgPCEtLSBjb3JpYW5kZXIgbGVhdmVzIC0tPgogIDxnIGZpbGw9IiM0ZjhhNmUiPgogICAgPGVsbGlwc2UgY3g9IjQyMCIgY3k9IjMwMCIgcng9IjEwIiByeT0iNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTI1IDQyMCAzMDApIi8+CiAgICA8ZWxsaXBzZSBjeD0iNDM0IiBjeT0iMjkyIiByeD0iOSIgcnk9IjQiIHRyYW5zZm9ybT0icm90YXRlKDIwIDQzNCAyOTIpIi8+CiAgICA8ZWxsaXBzZSBjeD0iMTkwIiBjeT0iMzE4IiByeD0iOSIgcnk9IjQiIHRyYW5zZm9ybT0icm90YXRlKC0xMCAxOTAgMzE4KSIvPgogICAgPGVsbGlwc2UgY3g9Ijk2IiBjeT0iMjMwIiByeD0iMTAiIHJ5PSI1IiB0cmFuc2Zvcm09InJvdGF0ZSgzMCA5NiAyMzApIi8+CiAgPC9nPgo8L3N2Zz4K";
+  var BROKEN = "data:image/svg+xml,this-file-is-missing";
+
+  /* ---------- The example page, as a tree ---------- */
+  var CSS = [
+    "body { margin: 0; font-family: Georgia, serif; line-height: 1.6; color: #35231a; background: #fbf6ea; }",
+    "header { background: #d18f00; padding: 12px 16px; }",
+    "h1 { margin: 0 0 6px; }",
+    "nav a { color: #2e1c10; font-weight: bold; margin-right: 12px; }",
+    "main { padding: 0 16px; }",
+    ".photo { display: inline-block; padding: 6px; background: #4f8a6e; border-radius: 10px; }",
+    "button { background: #d18f00; border: 0; padding: 10px 16px; border-radius: 8px; font: inherit; }",
+    "footer { margin-top: 16px; padding: 4px 16px; color: #75604f; border-top: 1px solid #ece2cf; }"
+  ].join("\n");
+
+  function A(n, v, id, extra) { var a = { n: n, v: v, id: id || null }; if (extra) for (var k in extra) a[k] = extra[k]; return a; }
+  function el(tag, o, kids) { return { k: "el", tag: tag, id: o.id, attrs: o.attrs || [], kids: kids || [], ctl: o.ctl || "both", isVoid: !!o.isVoid, block: !!o.block }; }
+  function tx(s) { return { k: "tx", s: s }; }
+
+  var TREE = [
+    { k: "dt", id: "doctype" },
+    el("html", { id: "html", attrs: [A("lang", "en", "lang")] }, [
+      el("head", { id: "head" }, [
+        el("meta", { id: "charset", ctl: "remove", isVoid: true, attrs: [A("charset", "UTF-8")] }),
+        el("meta", { id: "viewport", ctl: "remove", isVoid: true, attrs: [A("name", "viewport"), A("content", "width=device-width, initial-scale=1.0")] }),
+        el("title", { id: "title" }, [tx("Wattle &amp; Chai · Café in Fitzroy")]),
+        el("style", { id: "style", block: true }, [tx(CSS)])
+      ]),
+      el("body", { id: "body" }, [
+        el("header", { id: "header" }, [
+          el("h1", { id: "h1" }, [tx("☕ Wattle &amp; Chai")]),
+          el("nav", { id: "nav" }, [
+            el("a", { id: "a1", attrs: [A("href", "#menu", "href1")] }, [tx("Menu")]),
+            el("a", { id: "a2", attrs: [A("href", "#visit", "href2")] }, [tx("Visit us")])
+          ])
+        ]),
+        el("main", { id: "main" }, [
+          el("section", { id: "secAbout", attrs: [A("id", "about")] }, [
+            el("h2", { id: "h2a" }, [tx("About the café")]),
+            el("p", { id: "p1" }, [
+              tx("We serve "), el("strong", { id: "strong" }, [tx("locally roasted coffee")]),
+              tx(" and the "), el("em", { id: "em" }, [tx("best")]), tx(" momos in Fitzroy.")
+            ]),
+            el("div", { id: "div", attrs: [A("class", "photo")] }, [
+              el("img", { id: "img", ctl: "remove", isVoid: true, attrs: [
+                A("src", "images/flat-white-hero.svg", "src", { real: HERO, broken: "images/flat-whte.svg", brokenReal: BROKEN }),
+                A("alt", "A flat white with a latte-art heart", "alt"),
+                A("width", "300", "width")
+              ] })
+            ])
+          ]),
+          el("section", { id: "secMenu", attrs: [A("id", "menu")] }, [
+            el("h2", { id: "h2m" }, [tx("Today's menu")]),
+            el("h3", { id: "h3d" }, [tx("Drinks")]),
+            el("ul", { id: "ul" }, [
+              el("li", { id: "li1" }, [tx("Flat White — $5.50")]),
+              el("li", { id: "li2" }, [tx("Masala Chai — $5.00")])
+            ]),
+            el("h3", { id: "h3f" }, [tx("How we make a flat white")]),
+            el("ol", { id: "ol" }, [
+              el("li", { id: "oli1" }, [tx("Pull a double shot of espresso.")]),
+              el("li", { id: "oli2" }, [tx("Steam the milk until it is silky.")]),
+              el("li", { id: "oli3" }, [tx("Pour the milk over the coffee.")])
+            ]),
+            { k: "cm", id: "comment", s: " Note for staff: Long Black is coming next week " },
+            el("button", { id: "button", attrs: [A("type", "button")] }, [tx("Add to order")]),
+            el("p", { id: "p2", attrs: [A("style", "color: #4f8a6e; font-weight: bold;", "styleattr")] }, [tx("New: Chicken Momo — $16.00")])
+          ])
+        ]),
+        el("footer", { id: "footer", attrs: [A("id", "visit")] }, [
+          el("p", { id: "p3" }, [tx("Brunswick Street, Fitzroy VIC 3065 · Open 7am – 4pm")])
+        ])
+      ])
+    ])
+  ];
+
+  /* ---------- What each part is for, and what removing it does ----------
+     Text in `backticks` is shown as code. */
+  var EX = {
+    doctype: { use: "Line 1 of every page. It tells the browser: this is modern HTML, use today's rules.",
+      rm: "Look at the badge: the browser switched to Quirks mode, the old 1990s way of drawing pages (kept so very old websites still work). Some CSS behaves differently. Look at the green frame round the coffee picture: in Standards mode it is thicker at the bottom (a gap kept for letters like g and y). In Quirks mode that gap disappears." },
+    html: { use: "Wraps the whole page. Its `lang` attribute says which language the page is in.",
+      tag: "The page looks the same, because the browser quietly adds `<html>` back for you. But `lang=\"en\"` went with the tag: the panel now says the language is not set.",
+      el: "Everything is gone. `<html>` holds the whole page, so removing the element removes the head and the body too." },
+    lang: { use: "`lang=\"en\"` tells screen readers which voice and accent to use, and tells Google which searchers to show the page to.",
+      off: "Nothing changes on screen, because this attribute is for machines. Check the panel: Language now says “not set”. A screen reader might read English words with the wrong accent." },
+    head: { use: "Holds information ABOUT the page: the letters it uses, phone settings, the tab title and styles. Nothing in the head shows on the page.",
+      tag: "Nothing changed. The browser knows meta, title and style belong in the head, so it builds a head for you. Still write it: it keeps your file clear.",
+      el: "The tab now shows the file name instead of a title, and the colours and fonts are gone, because the `<style>` lived in the head." },
+    charset: { use: "Lets the page show every letter and symbol: é in café, the — dash, emojis like ☕.",
+      rm: "Simulated: without a charset, a browser can guess the wrong letter table, so “café” turns into “cafÃ©” and ☕ into junk. (This preview is always read as UTF-8, so we fake the mix-up to show what visitors would see.)",
+      on: "The letters are right again: café, — and ☕." },
+    viewport: { use: "Makes the page fit a phone screen instead of looking tiny.",
+      rm: "Simulated phone: without this tag, a phone pretends the screen is 980px wide, draws the page that wide, then shrinks it to fit. Everything is tiny and people must pinch to zoom. Phone view is now on so you can see it.",
+      on: "With the tag, the phone uses its real width (390px here), so the text is a normal, readable size." },
+    title: { use: "The text on the browser tab, in bookmarks, and the blue link in Google results.",
+      tag: "The words jumped onto the page, and the tab lost its name! Text can't live in the head, so the browser moved it into the body. The `<title>` tag is what says “this text is for the tab”.",
+      el: "The tab now shows the file name, “index.html”. Google would have to make up a title for your page." },
+    style: { use: "A `<style>` block holds the CSS for this one page: colours, fonts, spacing.",
+      tag: "The CSS code now shows as plain words on the page, and the colours are gone. Without the `<style>` tag, the browser thinks it is just text.",
+      el: "All the colours, fonts and spacing are gone, but every heading, list and link is still there. HTML is the walls; CSS is the paint." },
+    body: { use: "Holds everything you can see on the page.",
+      tag: "Nothing changed! The browser adds `<body>` for you if it's missing. Still write it: people and tools expect it.",
+      el: "The page is empty. Everything you can see lives inside the body." },
+    header: { use: "The top bar of a page: usually the name or logo and the main links.",
+      tag: "The gold bar disappeared, because our CSS paints the `header` tag gold. The words stayed. In the panel, the “banner” landmark is gone: screen reader users can no longer jump to the top bar.",
+      el: "The whole top bar (café name and links) is gone." },
+    nav: { use: "Wraps the main links of the site. Screen readers announce it as “navigation”, so people find the menu fast.",
+      tag: "The links lost their bold brown look (our CSS says `nav a`), and the “navigation” landmark left the panel. The links still work, but nothing says “this is the site menu” any more.",
+      el: "Both links are gone." },
+    a: { use: "`<a>` makes a link: click it to go somewhere. Rule of thumb: link = go somewhere, button = do something.",
+      tag: "The words are plain text now. You can't click them, and the Tab key skips them.",
+      el: "The link is gone, words and all." },
+    href1: { use: "`href` is the address the link goes to. `#menu` means “jump to the part with id=\"menu\"”.",
+      off: "The `<a>` tag is still there, but without `href` it is not a real link: not blue, no click, the Tab key skips it. The attribute is the information that makes the tag work." },
+    main: { use: "The main content of the page. One per page. Screen reader users can skip straight to it.",
+      tag: "The content moved to the left edge (our CSS gave `main` some padding), and the “main” landmark is gone from the panel.",
+      el: "Everything between the top bar and the footer is gone." },
+    section: { use: "Groups one topic with its heading, like a chapter. Its `id` lets links jump here.",
+      tag: "Looks almost the same! A section is about meaning, not looks. In the panel, the section left the list, and the `id` went with the tag, so a link to it has nowhere to jump.",
+      el: "The whole section (its heading and everything inside) is gone." },
+    h1: { use: "The main heading. One `h1` per page: it says what the whole page is about, for people and for Google.",
+      tag: "The words are now plain text: small, not bold, and missing from the heading outline in the panel.",
+      el: "The heading is gone, words and all. See the difference? “Remove tag only” kept the words. “Remove whole element” threw away the tag AND the words." },
+    h2: { use: "A section heading. Headings are the page's table of contents: screen reader users jump between them. Don't pick a heading for its size; CSS does size.",
+      tag: "The heading is now ordinary text, and the outline in the panel lost a chapter.",
+      el: "The heading is gone completely." },
+    h3: { use: "A smaller heading inside a section.",
+      tag: "The words are now ordinary text, and the heading outline lost a line.",
+      el: "The heading is gone completely." },
+    p: { use: "One paragraph of text.",
+      tag: "The words stay, but the space above and below is gone, so they bump into the next thing. `<p>` says “this is one paragraph”.",
+      el: "The whole paragraph is gone, including anything nested inside it." },
+    strong: { use: "Marks words as important. It shows bold, and screen readers can stress it.",
+      tag: "“locally roasted coffee” is no longer bold.",
+      el: "“locally roasted coffee” is gone, so the sentence now says “We serve and the best…”. The element was nested inside the `<p>`, so only that piece went." },
+    em: { use: "Stress, like saying a word louder. It shows in italics.",
+      tag: "“best” is no longer italic.",
+      el: "The word “best” is gone from the sentence." },
+    div: { use: "A plain box with no meaning. We use it only to hang styles on: here, the green frame (`class=\"photo\"`). Use a meaningful tag when one fits.",
+      tag: "The green frame disappeared but the picture stayed. Nothing else changed: a div means nothing to Google or screen readers.",
+      el: "The frame AND the picture inside it are gone. Removing a box removes what is in it." },
+    img: { use: "Shows a picture. It has no content and no closing tag, only attributes.",
+      rm: "The picture is gone." },
+    src: { use: "`src` is where the file is. `images/flat-white-hero.svg` means: go into the images folder, find this file.",
+      off: "The path now has a typo (flat-whte), so the browser can't find the file. You see a broken-image icon and the alt text instead. That is why alt matters, and why paths must be exact.",
+      on: "The path is fixed, so the picture loads again." },
+    alt: { use: "Words that describe the picture. Screen readers read them out, and the browser shows them if the picture breaks.",
+      off: "No change you can see while the picture loads. But a blind visitor now hears nothing useful (see the warning in the panel). Tick “Break the path” too: with no alt, there's only a broken icon and no words." },
+    width: { use: "How wide to draw the picture, in pixels. The height follows by itself.",
+      off: "The picture jumped to the size saved in the file: 1200px wide, wider than the screen. `width` tells the browser how big to draw it." },
+    ul: { use: "A dot-point list (unordered: the order doesn't matter). Each item goes in an `<li>`.",
+      tag: "The items lost their box: no indent, so the dots hang off the left edge. `<ul>` is the box that says “these belong together as dot points”.",
+      el: "The whole drinks list is gone." },
+    li: { use: "One item in a list.",
+      tag: "This item lost its dot (or number). Without `<li>` it is loose text, not a list item.",
+      el: "That one item is gone. The other items stay." },
+    ol: { use: "A numbered list. Use it when the order matters, like steps.",
+      tag: "The numbers turned into dots and the indent is gone. Without `<ol>`, nothing says the order matters.",
+      el: "All three steps are gone." },
+    comment: { use: "A note for people reading the code. The browser skips it.",
+      rm: "Nothing changed on the page, and that's the point! Comments are notes for humans. The browser never shows them." },
+    button: { use: "A button does something on the page (JavaScript makes it work). Link = go somewhere, button = do something.",
+      tag: "“Add to order” is plain text now: nothing to click, and the Tab key skips it.",
+      el: "The button is gone." },
+    p2: { use: "One paragraph of text, with an inline style on its tag.",
+      tag: "The words stay, but the green colour and bold are gone too: the `style` attribute lived on the `<p>` tag, so it left with the tag.",
+      el: "The whole paragraph is gone." },
+    styleattr: { use: "An inline style: CSS written in a `style=\"\"` attribute on one tag. It only styles this one element.",
+      off: "“New: Chicken Momo” lost its green colour and bold. Inline style is handy for a quick test, but ten cards means ten edits, so real sites use a `<style>` block or a .css file." },
+    footer: { use: "The bottom of the page: address, hours, copyright. Screen readers call it “contentinfo”.",
+      tag: "The line and grey colour are gone (our CSS styles `footer`), and the footer landmark left the panel. Also, `id=\"visit\"` was on this tag, so the “Visit us” link has nowhere to jump now.",
+      el: "The address line is gone." }
+  };
+  EX.href2 = { use: "`href` is the address the link goes to. `#visit` means “jump to the part with id=\"visit\"” (the footer).", off: EX.href1.off };
+
+  /* Rows that should open the Google & screen readers panel */
+  var PANEL = { html: 1, lang: 1, header: 1, nav: 1, main: 1, secAbout: 1, secMenu: 1, footer: 1, h1: 1, h2a: 1, h2m: 1, h3d: 1, h3f: 1, alt: 1, title: 1 };
+
+  /* ---------- Index the tree ---------- */
+  var NODES = {}, ATTRS = {};
+  (function index(list, parent) {
+    list.forEach(function (n) {
+      n.parent = parent;
+      if (n.id) NODES[n.id] = n;
+      if (n.attrs) n.attrs.forEach(function (a) { if (a.id) { ATTRS[a.id] = a; a.owner = n; } });
+      if (n.kids) index(n.kids, n);
+    });
+  })(TREE, null);
+
+  /* ---------- State ---------- */
+  var mode = {};   // id -> "on" | "tag" | "el"
+  var attrOff = {}; // attr id -> true
+  function m(id) { return mode[id] || "on"; }
+
+  /* ---------- Helpers ---------- */
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function fmt(s) { return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+  var W1252 = { 128: "€", 130: "‚", 131: "ƒ", 132: "„", 133: "…", 134: "†", 135: "‡", 136: "ˆ", 137: "‰", 138: "Š", 139: "‹", 140: "Œ", 142: "Ž", 145: "‘", 146: "’", 147: "“", 148: "”", 149: "•", 150: "–", 151: "—", 152: "˜", 153: "™", 154: "š", 155: "›", 156: "œ", 158: "ž", 159: "Ÿ" };
+  function moji(s) { // UTF-8 bytes read as Windows-1252: what a browser shows if it guesses the wrong charset
+    var b = new TextEncoder().encode(s), o = "";
+    for (var i = 0; i < b.length; i++) { var x = b[i]; o += x < 128 ? String.fromCharCode(x) : (W1252[x] || (x < 160 ? "" : String.fromCharCode(x))); }
+    return o;
+  }
+  function present(id) { // is this node (and every ancestor) still in the page, not deleted as a whole element?
+    var n = NODES[id];
+    while (n) { if (n.id && m(n.id) === "el") return false; n = n.parent; }
+    return true;
+  }
+  function attrValue(a, real) {
+    if (a.id === "src") return attrOff.src ? (real ? a.brokenReal : a.broken) : (real ? a.real : a.v);
+    return a.v;
+  }
+  function attrRemoved(a) { return a.id && a.id !== "src" && attrOff[a.id]; }
+
+  /* ---------- Build the preview HTML ---------- */
+  function toHTML(n, simCharset) {
+    if (n.k === "dt") return m("doctype") === "el" ? "" : "<!DOCTYPE html>";
+    if (n.k === "cm") return m(n.id) === "el" ? "" : "<!--" + n.s + "-->";
+    if (n.k === "tx") return simCharset ? moji(n.s) : n.s;
+    var md = m(n.id);
+    if (md === "el") return "";
+    var sep = isInline(n) ? "" : "\n";
+    var inner = n.kids.map(function (k) { return toHTML(k, simCharset); }).join(sep);
+    if (md === "tag") return inner;
+    var at = "";
+    n.attrs.forEach(function (a) { if (!attrRemoved(a)) at += " " + a.n + '="' + esc(attrValue(a, true)) + '"'; });
+    at += ' data-x="' + n.id + '"';
+    return "<" + n.tag + at + ">" + (n.isVoid ? "" : sep + inner + sep + "</" + n.tag + ">");
+  }
+
+  /* ---------- Build the code view ---------- */
+  var INLINE = { strong: 1, em: 1, a: 1, img: 1 };
+  function isInline(n) {
+    if (n.block) return false;
+    return n.kids.every(function (k) { return (k.k === "tx" && k.s.indexOf("\n") < 0) || (k.k === "el" && INLINE[k.tag]); });
+  }
+  function g(cls, html, gone) { return '<span class="' + cls + (gone ? " gone" : "") + '">' + html + "</span>"; }
+  function openTag(n, tagGone) {
+    var s = "&lt;" + n.tag;
+    var out = g("tg", s, tagGone);
+    n.attrs.forEach(function (a) {
+      var off = tagGone || attrRemoved(a);
+      var edited = a.id === "src" && attrOff.src;
+      out += (tagGone ? g("", " ", true) : " ") + '<span class="' + (off ? "gone" : "") + (edited ? " edited" : "") + '"><span class="an">' + a.n + '</span>=<span class="av">"' + esc(attrValue(a, false)) + '"</span></span>';
+    });
+    return out + g("tg", "&gt;", tagGone);
+  }
+  function closeTag(n, tagGone) { return g("tg", "&lt;/" + n.tag + "&gt;", tagGone); }
+  function inlineCode(n, gone) {
+    if (n.k === "tx") return g("", esc(n.s), gone);
+    var md = m(n.id), eg = gone || md === "el", tg = eg || md === "tag";
+    var out = openTag(n, tg);
+    if (n.isVoid) return out;
+    n.kids.forEach(function (k) { out += inlineCode(k, eg); });
+    return out + closeTag(n, tg);
+  }
+  function idsIn(n, out) { if (n.id) out.push(n.id); (n.kids || []).forEach(function (k) { if (k.k === "el") idsIn(k, out); }); return out; }
+  function buildLines(n, depth, gone, out) {
+    var ind = new Array(depth + 1).join("  ");
+    if (n.k === "dt") { out.push({ html: g("tg", "&lt;!DOCTYPE html&gt;", m("doctype") === "el"), ids: ["doctype"], owner: "doctype" }); return; }
+    if (n.k === "cm") { out.push({ html: ind + g("cm", "&lt;!--" + esc(n.s) + "--&gt;", gone || m(n.id) === "el"), ids: [n.id], owner: n.id }); return; }
+    if (n.k === "tx") {
+      n.s.split("\n").forEach(function (l) { out.push({ html: ind + g("css", esc(l), gone), ids: [], owner: null }); });
+      return;
+    }
+    var md = m(n.id), eg = gone || md === "el", tg = eg || md === "tag";
+    if (isInline(n)) { out.push({ html: ind + inlineCode(n, gone), ids: idsIn(n, []), owner: n.id }); return; }
+    out.push({ html: ind + openTag(n, tg), ids: [n.id], owner: n.id });
+    n.kids.forEach(function (k) { buildLines(k, depth + 1, eg, out); });
+    if (!n.isVoid) out.push({ html: ind + closeTag(n, tg), ids: [], owner: n.id, close: true });
+  }
+  function allLines() { var out = []; TREE.forEach(function (n) { buildLines(n, 0, false, out); }); return out; }
+
+  /* ---------- Controls ---------- */
+  function chipName(id) {
+    var n = NODES[id];
+    if (n.k === "dt") return "<!DOCTYPE>";
+    if (n.k === "cm") return "<!-- comment -->";
+    if (n.tag === "meta") return n.attrs[0].n === "name" ? "<meta name=\"viewport\">" : "<meta charset>";
+    return "<" + n.tag + ">";
+  }
+  function tog(id, act, label, extraCls) {
+    return '<label class="tog' + (extraCls ? " " + extraCls : "") + '"><input type="checkbox" data-id="' + id + '" data-act="' + act + '"> ' + label + "</label>";
+  }
+  function controlsFor(id) {
+    var n = NODES[id], h = '<div class="grp"><span class="chip">' + esc(chipName(id)) + "</span>";
+    if (n.k === "dt") h += tog(id, "el", "Remove doctype");
+    else if (n.k === "cm") h += tog(id, "el", "Remove comment");
+    else if (n.ctl === "remove") h += tog(id, "el", n.tag === "img" ? "Remove image" : "Remove it");
+    else h += tog(id, "tag", "Remove tag only") + tog(id, "el", "Remove whole element");
+    (n.attrs || []).forEach(function (a) {
+      if (!a.id) return;
+      h += tog(a.id, "attr", a.id === "src" ? "Break the path" : "Remove " + a.n + (a.n === "style" ? " attribute" : ""), "attr");
+    });
+    return h + "</div>";
+  }
+
+  var codeEl = document.getElementById("code");
+  var rows = [];
+  (function buildRows() {
+    var html = "";
+    allLines().forEach(function (l, i) {
+      html += '<div class="row' + (l.ids.length ? " ctl-row" : "") + '" data-owner="' + (l.owner || "") + '" data-i="' + i + '"><code class="ln"></code>' +
+        (l.ids.length ? '<div class="ctls">' + l.ids.map(controlsFor).join("") + "</div>" : "") + "</div>";
+    });
+    codeEl.innerHTML = html;
+    rows = Array.prototype.slice.call(codeEl.querySelectorAll(".row"));
+  })();
+
+  /* ---------- Preview ---------- */
+  var frame = document.getElementById("frame");
+  var stage = document.getElementById("stage");
+  var device = document.getElementById("device");
+  var phoneCb = document.getElementById("phone");
+  var seoCb = document.getElementById("seo");
+  var seoPanel = document.getElementById("seopanel");
+  var simtag = document.getElementById("simtag");
+  var badge = document.getElementById("mode");
+  var tabTitle = document.getElementById("tabtitle");
+  var whatEl = document.getElementById("what");
+  var pending = null, lastTitle = null, keepScroll = 0;
+
+  function viewportOn() { return present("viewport"); }
+  function charsetOn() { return present("charset"); }
+
+  function layoutFrame() {
+    var sims = [];
+    if (!charsetOn()) sims.push("Simulated: wrong charset");
+    if (!phoneCb.checked) {
+      stage.classList.remove("phone");
+      device.style.width = device.style.height = "";
+      frame.style.width = frame.style.height = frame.style.transform = "";
+    } else {
+      stage.classList.add("phone");
+      var avail = stage.clientWidth - 40;
+      var dispW = Math.max(220, Math.min(390, avail)), dispH = Math.round(dispW * 1.55);
+      var logical = viewportOn() ? 390 : 980;
+      var s = dispW / logical;
+      device.style.width = dispW + "px"; device.style.height = dispH + "px";
+      frame.style.width = logical + "px"; frame.style.height = Math.round(dispH / s) + "px";
+      frame.style.transform = "scale(" + s + ")";
+      sims.push(viewportOn() ? "Simulated phone, 390px wide (viewport tag on)" : "Simulated phone with no viewport tag: page drawn 980px wide, then shrunk");
+    }
+    simtag.hidden = !sims.length;
+    simtag.textContent = sims.join(" · ");
+  }
+
+  function render(change) {
+    allLines().forEach(function (l, i) {
+      rows[i].querySelector(".ln").innerHTML = l.html || " ";
+    });
+    try { keepScroll = frame.contentWindow ? frame.contentWindow.scrollY : 0; } catch (e) { keepScroll = 0; }
+    pending = change || null;
+    layoutFrame();
+    var sim = !charsetOn();
+    // document.write, not srcdoc: a srcdoc page is always forced into Standards mode,
+    // so the doctype toggle could not honestly show Quirks mode.
+    var d = frame.contentDocument;
+    d.open(); d.write(TREE.map(function (n) { return toHTML(n, sim); }).join("\n")); d.close();
+    afterLoad();
+  }
+
+  function afterLoad() {
+    var doc, win;
+    try { doc = frame.contentDocument; win = frame.contentWindow; } catch (e) { doc = null; }
+    if (!doc) return;
+    if (keepScroll) { var y = keepScroll; win.scrollTo(0, y); setTimeout(function () { if (win.scrollY < y) win.scrollTo(0, y); }, 80); }
+    var quirks = doc.compatMode === "BackCompat";
+    badge.textContent = quirks ? "Browser mode: Quirks (old) ⚠" : "Browser mode: Standards ✓";
+    badge.classList.toggle("quirks", quirks);
+    var t = doc.title ? doc.title : "index.html";
+    tabTitle.textContent = t;
+    if (lastTitle !== null && lastTitle !== t) flashClass(document.getElementById("tab"));
+    lastTitle = t;
+    buildSeo(doc);
+    if (pending) { explain(pending, doc, quirks); flashPreview(pending, doc, win); }
+    pending = null;
+  }
+
+  function flashClass(elm) { elm.classList.remove("flash"); void elm.offsetWidth; elm.classList.add("flash"); }
+
+  function flashPreview(ch, doc, win) {
+    flashClass(stage);
+    var n = ch.attr ? ATTRS[ch.id].owner : NODES[ch.id];
+    if (!n || n.k === "dt") return;
+    if (!ch.attr && m(n.id) !== "on") n = n.parent;          // its tag is gone, so light up the parent
+    while (n && n.id && m(n.id) !== "on") n = n.parent;
+    var inHead = false, p = n;
+    while (p) { if (p.id === "head") inHead = true; p = p.parent; }
+    if (!n || inHead || n.tag === "html" || n.tag === "body" || n.k === "dt") return;
+    var target = doc.querySelector('[data-x="' + n.id + '"]');
+    if (!target || !target.animate) return;
+    var r = target.getBoundingClientRect(), vh = win.innerHeight;
+    if (r.top < 0 || r.top > vh - 60) win.scrollBy(0, r.top - 40);
+    target.animate([
+      { outline: "4px solid rgba(209,143,0,1)", outlineOffset: "2px", backgroundColor: "rgba(242,189,58,.45)" },
+      { outline: "4px solid rgba(209,143,0,0)", outlineOffset: "2px", backgroundColor: "rgba(242,189,58,0)" }
+    ], { duration: 1500, easing: "ease-out" });
+  }
+
+  function explainKey(id) {
+    if (EX[id]) return EX[id];
+    var n = NODES[id];
+    if (n && n.tag === "section") return EX.section;
+    if (n && n.tag === "p") return EX.p;
+    if (n && n.tag === "li") return EX.li;
+    return EX[n && n.tag] || { use: "" };
+  }
+
+  function explain(ch, doc, quirks) {
+    var info = explainKey(ch.id), name, head, body;
+    if (ch.attr) {
+      var a = ATTRS[ch.id];
+      name = "<" + a.owner.tag + ">";
+      if (ch.id === "src") head = ch.on ? "You fixed the image path." : "You broke the image path.";
+      else head = ch.on ? "You put the `" + a.n + "` attribute back on `" + name + "`." : "You removed the `" + a.n + "` attribute from `" + name + "`.";
+      body = ch.on ? (info.on || "The page is back to how it was.") : info.off;
+    } else {
+      name = chipName(ch.id);
+      if (ch.act === "on") { head = "You put `" + name + "` back."; body = info.on || "The page is back to how it was."; }
+      else if (ch.act === "tag") { head = "You removed the `" + name + "` tag only. The content stayed."; body = info.tag; }
+      else {
+        var n = NODES[ch.id];
+        head = (n.k === "dt" || n.k === "cm" || n.ctl === "remove") ? "You removed `" + name + "`." : "You removed the whole `" + name + "` element: tag and content.";
+        body = info.el || info.rm;
+      }
+    }
+    var extra = "";
+    if (ch.id === "doctype") {
+      var probe = quirkProbe(doc);
+      extra = " Live test inside the preview: the CSS `width: 300` (no px) was " + (probe ? "OBEYED. Only Quirks mode allows that old mistake." : "IGNORED, as modern rules say.");
+      if (ch.act === "on") body = "The badge says Standards again: the browser uses modern rules.";
+    }
+    whatEl.innerHTML = '<p class="head">' + fmt(head) + "</p><p>" + fmt(body + extra) + '</p><p class="use"><b>What it\'s for:</b> ' + fmt(info.use) + "</p>";
+  }
+
+  function quirkProbe(doc) { // real test: unitless lengths only work in quirks mode
+    try {
+      var d = doc.createElement("div");
+      d.setAttribute("style", "position:absolute;visibility:hidden;left:0;top:0;width:300");
+      (doc.body || doc.documentElement).appendChild(d);
+      var w = d.offsetWidth; d.parentNode.removeChild(d);
+      return w === 300;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- What Google & screen readers see ---------- */
+  var LANDMARK = { header: "banner (top bar)", nav: "navigation", main: "main", section: "section", footer: "contentinfo (footer)" };
+  function li(text, cls) { var l = document.createElement("li"); l.textContent = text; if (cls) l.className = cls; return l; }
+  function buildSeo(doc) {
+    seoPanel.hidden = !seoCb.checked;
+    if (!seoCb.checked) return;
+    seoPanel.innerHTML = "";
+    var h = document.createElement("h3"); h.textContent = "What Google & screen readers see"; seoPanel.appendChild(h);
+    function sec(title) { var x = document.createElement("h4"); x.textContent = title; seoPanel.appendChild(x); var u = document.createElement("ul"); seoPanel.appendChild(u); return u; }
+
+    var u = sec("Search result");
+    var serp = document.createElement("li"); serp.className = "serp"; serp.style.listStyle = "none";
+    var b = document.createElement("b"); b.textContent = doc.title || "(no title, so Google makes one up)";
+    serp.appendChild(b); u.style.paddingLeft = "0"; u.appendChild(serp);
+
+    u = sec("Language");
+    var lang = doc.documentElement.getAttribute("lang");
+    u.appendChild(lang ? li("lang=\"" + lang + "\": English. A screen reader uses an English voice.") : li("Not set. A screen reader has to guess the voice and accent.", "warn"));
+
+    u = sec("Landmarks (screen reader users jump between these)");
+    var lms = doc.querySelectorAll("header, nav, main, section, footer");
+    if (!lms.length) u.appendChild(li("None. The page is one big blob: nothing to jump to.", "warn"));
+    Array.prototype.forEach.call(lms, function (x) {
+      var t = x.tagName.toLowerCase(), label = LANDMARK[t];
+      if (t === "section") { var hh = x.querySelector("h1,h2,h3"); label += hh ? ": “" + hh.textContent.trim() + "”" : " (no heading)"; }
+      u.appendChild(li("<" + t + "> → " + label));
+    });
+
+    u = sec("Heading outline (the table of contents)");
+    var hs = doc.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    if (!hs.length) u.appendChild(li("No headings. Nothing to skim.", "warn"));
+    Array.prototype.forEach.call(hs, function (x) {
+      var lv = +x.tagName[1], it = li(x.tagName.toLowerCase() + "  " + x.textContent.trim());
+      it.style.marginLeft = (lv - 1) * 18 + "px"; u.appendChild(it);
+    });
+    if (hs.length && !doc.querySelector("h1")) u.appendChild(li("No h1: nothing says what the whole page is about.", "warn"));
+
+    u = sec("Images");
+    if (!doc.images.length) u.appendChild(li("No images."));
+    Array.prototype.forEach.call(doc.images, function (im) {
+      var alt = im.getAttribute("alt");
+      u.appendChild(alt ? li("Image: “" + alt + "”") : li("Image with NO alt: a screen reader says “image” or reads the file name.", "warn"));
+    });
+
+    u = sec("Links and buttons");
+    var ctrls = doc.querySelectorAll("a[href], button");
+    if (!ctrls.length) u.appendChild(li("Nothing to click or Tab to."));
+    Array.prototype.forEach.call(ctrls, function (x) {
+      u.appendChild(x.tagName === "A" ? li("Link “" + x.textContent.trim() + "” → " + x.getAttribute("href")) : li("Button “" + x.textContent.trim() + "”"));
+    });
+    var dead = doc.querySelectorAll("a:not([href])");
+    Array.prototype.forEach.call(dead, function (x) { u.appendChild(li("“" + x.textContent.trim() + "” has <a> but no href, so it is not announced as a link.", "warn")); });
+
+    var note = document.createElement("p"); note.className = "note";
+    note.textContent = "Read live from the preview page. These tags change little on screen, but they change everything here.";
+    seoPanel.appendChild(note);
+  }
+
+  /* ---------- Events ---------- */
+  var activeRow = null;
+  function markRow(id) {
+    var key = ATTRS[id] ? ATTRS[id].owner.id : id;
+    var row = null;
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].querySelector('input[data-id="' + id + '"]')) { row = rows[i]; break; }
+    }
+    if (activeRow) activeRow.classList.remove("active");
+    rows.forEach(function (r) { if (r.dataset.owner === key && r !== row) r.classList.remove("active"); });
+    if (row) { row.classList.add("active"); flashClass(row); activeRow = row; }
+  }
+
+  codeEl.addEventListener("change", function (e) {
+    var cb = e.target;
+    if (!cb.matches("input[data-id]")) return;
+    var id = cb.dataset.id, act = cb.dataset.act, ch;
+    if (act === "attr") {
+      attrOff[id] = cb.checked;
+      ch = { id: id, attr: true, on: !cb.checked };
+    } else {
+      if (cb.checked) {
+        mode[id] = act;
+        codeEl.querySelectorAll('input[data-id="' + id + '"]').forEach(function (o) { if (o !== cb && o.dataset.act !== "attr") o.checked = false; });
+      } else mode[id] = "on";
+      ch = { id: id, act: cb.checked ? act : "on" };
+    }
+    if (id === "viewport" && cb.checked) phoneCb.checked = true;
+    if (PANEL[id] && cb.checked && !seoCb.checked) seoCb.checked = true;
+    markRow(id);
+    render(ch);
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    mode = {}; attrOff = {};
+    codeEl.querySelectorAll("input[type=checkbox]").forEach(function (c) { c.checked = false; });
+    if (activeRow) activeRow.classList.remove("active");
+    activeRow = null;
+    pending = null;
+    render(null);
+    whatEl.innerHTML = "<p class=\"head\">Reset: every tag is back.</p><p>The page is complete again. Pick a box and take something away.</p>";
+  });
+
+  phoneCb.addEventListener("change", function () { layoutFrame(); });
+  seoCb.addEventListener("change", function () {
+    try { buildSeo(frame.contentDocument); } catch (e) { /* ignore */ }
+  });
+  var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(layoutFrame, 100); });
+
+  render(null);
+
+  /* ---------- Now type it ---------- */
+  function norm(s) { return (s || "").toLowerCase().replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim(); }
+  function tagOf(x) { return x.tagName.toLowerCase(); }
+  var CH = [
+    { title: "1 · The main heading", task: "Make “Today's menu” the main heading of the page.",
+      start: "Today's menu", answer: "<h1>Today's menu</h1>",
+      check: function (d) {
+        var h1 = Array.prototype.find.call(d.querySelectorAll("h1"), function (h) { return norm(h.textContent).indexOf("today's menu") >= 0; });
+        if (h1) return [true, "✓ Nice — that's the main heading. One h1 per page."];
+        var other = d.querySelector("h2,h3,h4,h5,h6");
+        if (other) return [false, "Not yet — that's an <" + tagOf(other) + ">, a smaller heading. Hint: the MAIN heading is h1."];
+        if (d.querySelector("h1")) return [false, "Not yet — keep the words “Today's menu” inside the h1."];
+        return [false, "Not yet — hint: put <h1> before the words and </h1> after them."];
+      } },
+    { title: "2 · A dot-point list", task: "Turn “Flat White, Lamington, Momo” into a bulleted list.",
+      start: "Flat White, Lamington, Momo", answer: "<ul>\n  <li>Flat White</li>\n  <li>Lamington</li>\n  <li>Momo</li>\n</ul>",
+      check: function (d) {
+        var ul = d.querySelector("ul"), ol = d.querySelector("ol");
+        if (!ul && ol) return [false, "Not yet — that's a numbered list (ol). Dot points use <ul>."];
+        if (!ul) return [false, "Not yet — hint: start with <ul> and end with </ul>. Each item goes in <li>…</li>."];
+        var lis = ul.querySelectorAll("li");
+        if (lis.length < 3) return [false, "Not yet — you have " + lis.length + " <li>. Each of the 3 foods needs its own <li>…</li>."];
+        var all = Array.prototype.map.call(lis, function (x) { return norm(x.textContent); }).join("|");
+        var miss = ["flat white", "lamington", "momo"].filter(function (w) { return all.indexOf(w) < 0; });
+        if (miss.length) return [false, "Almost — I can't find “" + miss[0] + "” in an <li>."];
+        return [true, "✓ Nice — that's a bulleted list with three <li> items."];
+      } },
+    { title: "3 · A picture with alt text", task: "Add the momo picture (images/momo-plate.svg) with alt text that describes it.",
+      start: "", answer: "<img src=\"images/momo-plate.svg\" alt=\"A plate of steamed momos\" width=\"300\">",
+      check: function (d) {
+        var im = d.querySelector("img");
+        if (!im) return [false, "Not yet — hint: <img src=\"images/momo-plate.svg\" alt=\"…\">. No closing tag needed."];
+        if (!(im.getAttribute("src") || "").trim()) return [false, "Not yet — the image needs src=\"…\": where the file is."];
+        var alt = im.getAttribute("alt");
+        if (alt === null) return [false, "Picture added! Now add alt=\"…\" with words that describe it, for screen readers."];
+        if (!alt.trim()) return [false, "Not yet — the alt is empty. Describe the picture, e.g. alt=\"A plate of momos\"."];
+        return [true, "✓ Nice — a picture with alt text: “" + alt.trim() + "”."];
+      } },
+    { title: "4 · A link", task: "Make “Visit us” a link to #visit.",
+      start: "Visit us", answer: "<a href=\"#visit\">Visit us</a>",
+      check: function (d) {
+        var a = d.querySelector("a");
+        if (!a) return [false, "Not yet — hint: <a href=\"#visit\">Visit us</a>."];
+        var href = a.getAttribute("href");
+        if (href === null) return [false, "Almost — it's an <a>, but it needs href=\"#visit\" to go somewhere."];
+        if (href.trim() !== "#visit") return [false, "Almost — href should be \"#visit\" (with the #). Yours is \"" + href + "\"."];
+        if (norm(a.textContent).indexOf("visit us") < 0) return [false, "Almost — the words “Visit us” go between <a …> and </a>."];
+        return [true, "✓ Nice — that's a link. On the real page it jumps to the part with id=\"visit\"."];
+      } },
+    { title: "5 · Nesting", task: "Stress the word “best” with <em>, inside the paragraph.",
+      start: "<p>We have the best momos in Fitzroy.</p>", answer: "<p>We have the <em>best</em> momos in Fitzroy.</p>",
+      check: function (d) {
+        var em = d.querySelector("em");
+        if (!em) { if (d.querySelector("i")) return [false, "Close — <i> only looks italic. <em> means stress. Use <em>best</em>."]; return [false, "Not yet — hint: put <em> before best and </em> after it."]; }
+        if (!em.closest("p")) return [false, "Almost — put <em>best</em> INSIDE the paragraph, between <p> and </p>."];
+        if (norm(em.textContent) !== "best") return [false, "Almost — only the word “best” goes inside <em>…</em>."];
+        return [true, "✓ Nice — an em nested inside a p. Inner one closed first."];
+      } }
+  ];
+
+  var IMGMAP = [[/momo/i, MOMO], [/flat-white/i, HERO]];
+  var grid = document.getElementById("chgrid");
+  CH.forEach(function (c, i) {
+    var card = document.createElement("article");
+    card.className = "ch";
+    card.innerHTML = "<h3>" + esc(c.title) + "</h3><p>" + esc(c.task) + "</p>" +
+      '<label class="lbl" for="ta' + i + '">Your code</label>' +
+      '<textarea id="ta' + i + '" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>' +
+      '<iframe class="mini" sandbox="" title="Preview of challenge ' + (i + 1) + '"></iframe>' +
+      '<p class="fb" aria-live="polite"></p>' +
+      "<details><summary>Stuck? See one answer</summary><pre></pre></details>";
+    grid.appendChild(card);
+    var ta = card.querySelector("textarea"), mini = card.querySelector("iframe"), fb = card.querySelector(".fb");
+    card.querySelector("pre").textContent = c.answer;
+    ta.value = c.start;
+    var timer;
+    function run() {
+      var d = new DOMParser().parseFromString(ta.value, "text/html");
+      Array.prototype.forEach.call(d.images, function (im) {
+        var src = im.getAttribute("src") || "";
+        if (/^(https?:|data:)/i.test(src)) return;
+        var hit = IMGMAP.find(function (p) { return p[0].test(src); });
+        im.setAttribute("src", hit ? hit[1] : BROKEN);
+      });
+      mini.srcdoc = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><style>body{margin:10px;font-family:Georgia,serif;color:#35231a}img{max-width:100%;height:auto}</style></head><body>" + d.body.innerHTML + "</body></html>";
+      if (!ta.value.trim()) { fb.className = "fb"; fb.textContent = "Type your HTML in the box above."; return; }
+      var r = c.check(d);
+      fb.className = "fb " + (r[0] ? "ok" : "no");
+      fb.textContent = r[1];
+    }
+    ta.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(run, 250); });
+    run();
+  });
+})();
+</script>
+</body>
+</html>

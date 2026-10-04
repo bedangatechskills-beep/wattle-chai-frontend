@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <title>A flat white with latte art on a café table</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf6ea"/>
+      <stop offset="1" stop-color="#f1e2c4"/>
+    </linearGradient>
+    <linearGradient id="table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c99a6b"/>
+      <stop offset="1" stop-color="#a87a4e"/>
+    </linearGradient>
+    <radialGradient id="coffee" cx="0.5" cy="0.5" r="0.6">
+      <stop offset="0" stop-color="#c8925c"/>
+      <stop offset="1" stop-color="#8f5530"/>
+    </radialGradient>
+    <g id="wattle">
+      <circle r="11" fill="#f2bd3a"/>
+      <circle cx="16" cy="-8" r="9" fill="#e0a100"/>
+      <circle cx="4" cy="-20" r="8" fill="#f7cf5c"/>
+    </g>
+  </defs>
+
+  <!-- wall and table -->
+  <rect width="1200" height="600" fill="url(#wall)"/>
+  <rect y="500" width="1200" height="100" fill="url(#table)"/>
+  <path d="M0 540 H1200 M0 575 H1200" stroke="#9a6c43" stroke-width="3" opacity="0.4"/>
+
+  <!-- wattle sprigs in the corners -->
+  <path d="M0 120 C120 110 200 70 260 10" stroke="#5f8a5a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M90 110 C110 80 150 70 180 75 M170 60 C180 40 210 30 235 35" stroke="#5f8a5a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <use href="#wattle" x="60" y="95"/>
+  <use href="#wattle" x="140" y="70"/>
+  <use href="#wattle" x="200" y="45"/>
+  <use href="#wattle" x="245" y="20"/>
+  <use href="#wattle" x="185" y="95"/>
+  <path d="M1200 160 C1080 150 1000 100 950 20" stroke="#5f8a5a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M1110 150 C1090 120 1050 110 1020 115" stroke="#5f8a5a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <use href="#wattle" x="1140" y="140"/>
+  <use href="#wattle" x="1060" y="110"/>
+  <use href="#wattle" x="1000" y="70"/>
+  <use href="#wattle" x="965" y="35"/>
+  <use href="#wattle" x="1015" y="135"/>
+
+  <!-- steam -->
+  <g stroke="#d6c2a5" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.8">
+    <path d="M555 245 C530 215 580 195 555 160"/>
+    <path d="M600 235 C575 200 628 180 600 135"/>
+    <path d="M645 245 C620 215 670 195 645 160"/>
+  </g>
+
+  <!-- saucer -->
+  <ellipse cx="600" cy="478" rx="240" ry="44" fill="#8a5d38" opacity="0.25"/>
+  <ellipse cx="600" cy="468" rx="235" ry="42" fill="#ffffff" stroke="#e8dcc6" stroke-width="4"/>
+  <ellipse cx="600" cy="462" rx="150" ry="22" fill="#f4ede0"/>
+
+  <!-- cup handle -->
+  <path d="M740 330 C840 315 845 430 715 425" stroke="#ffffff" stroke-width="26" fill="none" stroke-linecap="round"/>
+  <path d="M740 330 C840 315 845 430 715 425" stroke="#ece2cf" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- cup body -->
+  <path d="M450 300 L750 300 C750 400 720 458 650 465 L550 465 C480 458 450 400 450 300 Z" fill="#ffffff"/>
+  <path d="M690 300 L750 300 C750 400 720 458 650 465 L630 465 C690 440 700 380 690 300 Z" fill="#efe5d4"/>
+
+  <!-- rim, coffee and latte art -->
+  <ellipse cx="600" cy="300" rx="150" ry="34" fill="#ffffff" stroke="#e6dac4" stroke-width="4"/>
+  <ellipse cx="600" cy="302" rx="136" ry="27" fill="url(#coffee)"/>
+  <path d="M600 324 C538 306 543 282 571 283 C588 284 598 292 600 299 C602 292 612 284 629 283 C657 282 662 306 600 324 Z" fill="#fbf1e0"/>
+  <path d="M600 299 L600 318" stroke="#d9b48a" stroke-width="3" stroke-linecap="round"/>
+</svg>

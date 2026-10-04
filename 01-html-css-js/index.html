@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  LAYER 1 — STRUCTURE (HTML)
+  HTML says WHAT is on the page: headings, text, buttons, lists.
+  It has no colours and does nothing on its own. Look for it in
+  DevTools → Elements. Style comes from styles.css, behaviour from script.js.
+  =====================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wattle &amp; Chai · Café menu</title>
+
+  <!-- Fonts (the page still looks fine offline thanks to fallback fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- LAYER 2: the style lives in its own file -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ---- Header: logo, nav, order badge, theme toggle ---- -->
+  <header class="site-header">
+    <a class="logo" href="#">☕ Wattle &amp; Chai</a>
+
+    <nav class="nav">
+      <ul>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#visit">Visit</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <div class="order-badge">
+        <span id="order-summary">🛒 0 items · $0.00</span>
+        <button class="btn btn--small" id="clear-order" type="button" hidden>Clear order</button>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">🌙</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ---- Hero ---- -->
+    <section class="hero">
+      <p class="hero__tagline">Flat whites, momos and good company · Melbourne</p>
+      <h1>Good coffee, every morning</h1>
+      <p class="hero__text">
+        Locally roasted coffee, a proper Aussie brunch and a warm seat by the window.
+        Pull up a chair and stay a while.
+      </p>
+      <a class="btn btn--primary" href="#menu">See the menu</a>
+    </section>
+
+    <!-- ---- Menu: six cards. Each card keeps its name and price in data-* attributes ---- -->
+    <section class="menu" id="menu">
+      <h2>Today's menu</h2>
+
+      <div class="menu-grid">
+
+        <article class="card" data-name="Flat White" data-price="5.5">
+          <div class="card__image">☕</div>
+          <span class="card__tag">Hot</span>
+          <h3 class="card__title">Flat White</h3>
+          <p class="card__text">Double shot, silky milk, the Melbourne classic</p>
+          <div class="card__footer">
+            <span class="card__price">$5.50</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+        <article class="card" data-name="Smashed Avo" data-price="19">
+          <div class="card__image">🥑</div>
+          <span class="card__tag">Popular</span>
+          <h3 class="card__title">Smashed Avo</h3>
+          <p class="card__text">Sourdough, feta, lemon and chilli flakes</p>
+          <div class="card__footer">
+            <span class="card__price">$19.00</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+        <article class="card" data-name="Chicken Momo" data-price="16">
+          <div class="card__image">🥟</div>
+          <span class="card__tag">Popular</span>
+          <h3 class="card__title">Chicken Momo</h3>
+          <p class="card__text">Eight steamed Nepali dumplings with tomato achar</p>
+          <div class="card__footer">
+            <span class="card__price">$16.00</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+        <article class="card" data-name="Masala Chai" data-price="5">
+          <div class="card__image">🫖</div>
+          <span class="card__tag">Hot</span>
+          <h3 class="card__title">Masala Chai</h3>
+          <p class="card__text">Spiced milk tea, brewed the slow way</p>
+          <div class="card__footer">
+            <span class="card__price">$5.00</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+        <article class="card" data-name="Butter Chicken Pie" data-price="12">
+          <div class="card__image">🥧</div>
+          <span class="card__tag">Popular</span>
+          <h3 class="card__title">Butter Chicken Pie</h3>
+          <p class="card__text">An Aussie meat pie with an Indian twist</p>
+          <div class="card__footer">
+            <span class="card__price">$12.00</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+        <article class="card" data-name="Lamington" data-price="6">
+          <div class="card__image">🍫</div>
+          <span class="card__tag card__tag--veg">Veg</span>
+          <h3 class="card__title">Lamington</h3>
+          <p class="card__text">Sponge, chocolate and coconut</p>
+          <div class="card__footer">
+            <span class="card__price">$6.00</span>
+            <button class="btn btn--primary add-btn" type="button">Add to order</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ---- About ---- -->
+    <section class="about" id="about">
+      <h2>About us</h2>
+      <p>
+        Wattle &amp; Chai is a neighbourhood café in Melbourne, serving flat whites and smashed avo to early walkers and late students.
+        Our menu mixes classic Aussie brunch with the Nepali and Indian flavours our kitchen grew up with.
+      </p>
+    </section>
+
+    <!-- ---- Visit ---- -->
+    <section class="visit" id="visit">
+      <h2>Visit us</h2>
+      <ul class="visit__list">
+        <li><strong>Address:</strong> Brunswick Street, Fitzroy VIC 3065</li>
+        <li><strong>Hours:</strong> Mon–Sun 7am – 4pm</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- ---- Footer ---- -->
+  <footer class="site-footer">
+    <p>© 2026 Wattle &amp; Chai · Built in class</p>
+  </footer>
+
+  <!-- LAYER 3: the behaviour lives in its own file (loaded last, after the HTML exists) -->
+  <script src="script.js"></script>
+</body>
+</html>

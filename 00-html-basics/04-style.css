@@ -1,0 +1,14 @@
+/* Way 3: an external CSS file. 04-styling-in-html.html links to it with <link rel="stylesheet" href="04-style.css">. */
+
+/* Every element with class="menu-item" gets this look, on every page that links this file. */
+.menu-item {
+  color: #ffffff;
+  background: #4f8a6e;   /* eucalyptus green */
+  padding: 12px;
+  border-radius: 12px;
+}
+
+/* An element selector: every <h1> on the page uses a serif font. */
+h1 {
+  font-family: Georgia, "Times New Roman", serif;
+}

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <title>A plate of steamed momos with tomato achar</title>
+  <defs>
+    <g id="momo">
+      <path d="M-62 25 C-68 -20 -22 -56 0 -62 C22 -56 68 -20 62 25 C32 42 -32 42 -62 25 Z" fill="#fdf8ee" stroke="#e3d3b8" stroke-width="3"/>
+      <path d="M0 -60 C-6 -35 -18 -15 -34 5 M0 -60 C-2 -32 -6 -10 -12 12 M0 -60 C2 -32 6 -10 12 12 M0 -60 C6 -35 18 -15 34 5" stroke="#e3d3b8" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="-30" cy="18" rx="14" ry="6" fill="#ffffff" opacity="0.8"/>
+    </g>
+  </defs>
+
+  <rect width="600" height="400" rx="24" fill="#f6efe2"/>
+
+  <!-- plate -->
+  <ellipse cx="300" cy="245" rx="250" ry="115" fill="#8a5d38" opacity="0.18"/>
+  <ellipse cx="300" cy="235" rx="245" ry="112" fill="#ffffff" stroke="#e8dcc6" stroke-width="4"/>
+  <ellipse cx="300" cy="232" rx="185" ry="78" fill="#faf5ec"/>
+
+  <!-- tomato achar bowl -->
+  <ellipse cx="455" cy="205" rx="52" ry="24" fill="#ffffff" stroke="#e3d3b8" stroke-width="3"/>
+  <ellipse cx="455" cy="203" rx="42" ry="17" fill="#c8442b"/>
+  <ellipse cx="445" cy="199" rx="12" ry="5" fill="#e0664b"/>
+
+  <!-- momos, back row then front row -->
+  <use href="#momo" x="200" y="205"/>
+  <use href="#momo" x="320" y="195"/>
+  <use href="#momo" x="140" y="260"/>
+  <use href="#momo" x="260" y="270"/>
+  <use href="#momo" x="380" y="265"/>
+
+  <!-- coriander leaves -->
+  <g fill="#4f8a6e">
+    <ellipse cx="420" cy="300" rx="10" ry="5" transform="rotate(-25 420 300)"/>
+    <ellipse cx="434" cy="292" rx="9" ry="4" transform="rotate(20 434 292)"/>
+    <ellipse cx="190" cy="318" rx="9" ry="4" transform="rotate(-10 190 318)"/>
+    <ellipse cx="96" cy="230" rx="10" ry="5" transform="rotate(30 96 230)"/>
+  </g>
+</svg>

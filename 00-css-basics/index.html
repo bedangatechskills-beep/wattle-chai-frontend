@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wattle &amp; Chai · CSS basics</title>
+
+  <!--
+    Two CSS files, in this order:
+    1. reset.css  — clears the browser's own default styles, so we start from the same place in every browser.
+    2. styles.css — OUR design. It comes second, so it wins when both files style the same thing.
+
+    TOGGLE TIP: to SEE what the reset does, turn it off:
+    - In VS Code: click the reset.css line below, press Ctrl+/ to turn it into a comment, and save, or
+    - In DevTools → Elements: click the <link ... href="reset.css"> line and press Delete. (Ctrl+Z brings it back.)
+    Watch the spacing jump and the big lamington image spill off the screen.
+  -->
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <h1 id="cafe-name">Wattle &amp; Chai</h1>
+    <p class="tagline">Flat whites, momos and good company · Melbourne</p>
+  </header>
+
+  <main>
+    <img class="hero-img" src="images/lamingtons.svg" alt="Three chocolate and coconut lamingtons on a white plate">
+
+    <h2>Today's special</h2>
+    <p>Lamingtons, made fresh every morning: sponge, chocolate and coconut.</p>
+
+    <!-- Which rule wins? Three rules give this paragraph a colour. See section 7 of styles.css. -->
+    <p class="price" id="special-price">Only $6.00 today</p>
+
+    <!-- The box model demo. Select it in DevTools and look at Computed. -->
+    <div class="box-demo">I am a box: content, padding, border and margin.</div>
+
+    <h2>Also on the menu</h2>
+    <ul class="menu-list">
+      <li>Flat White — $5.50</li>
+      <li>Chicken Momo — $16.00</li>
+      <li>Masala Chai — $5.00</li>
+    </ul>
+
+    <button class="btn" type="button">Order a lamington</button>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Wattle &amp; Chai · Built in class</p>
+  </footer>
+
+</body>
+</html>

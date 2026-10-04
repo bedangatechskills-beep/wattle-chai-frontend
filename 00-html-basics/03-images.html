@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wattle &amp; Chai · Images</title>
+</head>
+<body>
+
+  <h1>Wattle &amp; Chai</h1>
+
+  <!--
+    The main (hero) image: the big picture at the top of a page.
+    <img> has NO closing tag: it has no content, only attributes.
+
+      src   = where the image file is. "images/flat-white-hero.svg" is a RELATIVE path:
+              start in this file's folder, go into the images folder, find flat-white-hero.svg.
+      alt   = words that describe the image. Screen readers read it out for people who can't see,
+              and the browser shows it if the image fails to load. Never leave it out.
+      width = how wide to show it, in pixels. The height follows automatically.
+  -->
+  <img src="images/flat-white-hero.svg" alt="A flat white with a latte-art heart on a café table" width="600">
+
+  <p>Good coffee, every morning. Locally roasted, made the Melbourne way.</p>
+
+  <h2>Try our momos</h2>
+
+  <!-- A second image. Same three attributes, a different file and a smaller width. -->
+  <img src="images/momo-plate.svg" alt="A plate of five steamed chicken momos with tomato achar" width="300">
+
+  <p>Eight steamed Nepali dumplings with tomato achar — $16.00.</p>
+
+  <!--
+    Try this:
+    1. Change width="300" to width="500" and save. The picture grows.
+    2. Change src to "images/momo.svg" (a file that does not exist) and save.
+       You see a broken-image icon and the alt text instead. That is why alt matters.
+    3. Change it back to "images/momo-plate.svg".
+  -->
+
+</body>
+</html>

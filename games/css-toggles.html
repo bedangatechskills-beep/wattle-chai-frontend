@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS toggles · Wattle &amp; Chai</title>
+<style>
+  :root {
+    --cream: #fbf6ea;
+    --paper: #fffdf7;
+    --white: #ffffff;
+    --brown: #35231a;
+    --muted: #75604f;
+    --gold: #d18f00;
+    --gold-ink: #8a5e00;
+    --gold-soft: #f8e7bd;
+    --euc: #4f8a6e;
+    --euc-ink: #2f6b50;
+    --euc-soft: #dcebe2;
+    --line: #e8dcc6;
+    --red: #b3412e;
+    --code: ui-monospace, "Cascadia Code", Consolas, Menlo, "Courier New", monospace;
+    --sans: "Segoe UI", Roboto, Arial, sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--cream);
+    color: var(--brown);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  code, .code { font-family: var(--code); font-size: 0.92em; }
+  h1, h2, h3 { font-family: var(--serif); line-height: 1.2; margin: 0; }
+  button, input, select, textarea { font: inherit; }
+  a { color: var(--euc-ink); }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .top {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 14px 20px; background: var(--white); border-bottom: 1px solid var(--line);
+  }
+  .top h1 { font-size: 1.5rem; }
+  .top h1 span { color: var(--gold); }
+  .top p { margin: 2px 0 0; color: var(--muted); font-size: 0.95rem; }
+  .top-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    min-height: 44px; padding: 8px 16px; border-radius: 999px; border: 2px solid var(--brown);
+    background: var(--white); color: var(--brown); cursor: pointer; font-weight: 600;
+  }
+  .btn:hover { background: var(--gold-soft); }
+  .btn.primary { background: var(--gold); border-color: var(--gold); color: var(--white); }
+  .btn.primary:hover { background: #b87d00; }
+  .link-btn { display: inline-flex; align-items: center; text-decoration: none; }
+
+  /* ---------- workspace ---------- */
+  .work {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 44%);
+    gap: 20px; padding: 20px; align-items: start;
+  }
+  .sections { display: grid; gap: 18px; min-width: 0; }
+  .sec {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px;
+    min-width: 0;
+  }
+  .sec > h2 { font-size: 1.25rem; margin-bottom: 4px; }
+  .sec > h2 .num {
+    display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: 6px;
+    border-radius: 50%; background: var(--gold); color: var(--white); font-family: var(--sans); font-size: 0.85em;
+  }
+  .intro { margin: 0 0 12px; color: var(--muted); }
+  .intro code, .explain code, .readout code, .challenge code { background: var(--gold-soft); padding: 0 4px; border-radius: 4px; color: var(--brown); }
+
+  /* DevTools-like rule blocks */
+  .rule {
+    font-family: var(--code); font-size: 0.95rem; background: var(--white); border: 1px solid var(--line);
+    border-radius: 10px; padding: 6px 8px; margin-top: 10px; transition: background 0.3s;
+  }
+  .rule .cmt { color: #8d7a68; font-style: italic; padding: 2px 4px 4px 6px; font-size: 0.88rem; white-space: normal; }
+  .rule-head, .rule-foot { display: flex; align-items: center; gap: 2px; }
+  .rule-foot { padding: 2px 0 2px 46px; color: var(--muted); }
+  .tick {
+    display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 2px 6px; border-radius: 8px;
+    cursor: pointer; flex: 1 1 auto; min-width: 0;
+  }
+  .tick:hover { background: var(--cream); }
+  .tick input { width: 22px; height: 22px; accent-color: var(--euc); flex: none; cursor: pointer; margin: 0; }
+  .sel { color: var(--euc-ink); font-weight: 700; word-break: break-word; }
+  .tagname { color: #8a3c6a; }
+  .attr { color: #9a5b00; }
+  .punc { color: var(--muted); }
+  .decls { padding-left: 26px; }
+  .decl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; border-radius: 8px; }
+  .decl .code { word-break: break-word; }
+  .prop { color: #a03c28; }
+  .val { color: var(--gold-ink); font-weight: 600; }
+  .decl.off .code, .rule.off .decl .code { text-decoration: line-through; opacity: 0.55; }
+  .rule.off .rule-head .sel { opacity: 0.6; }
+  .decl.loses .code { text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+  .badge {
+    font-family: var(--sans); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    background: #f6d9d2; color: var(--red); white-space: nowrap;
+  }
+  .badge.win { background: var(--euc-soft); color: var(--euc-ink); }
+  .badge.sim { background: var(--gold-soft); color: var(--gold-ink); }
+  .ctrl { display: flex; align-items: center; gap: 8px; padding: 0 6px 6px 38px; flex: 1 1 220px; min-width: 0; max-width: 100%; }
+  .ctrl input[type="range"] { flex: 1; min-width: 120px; height: 32px; accent-color: var(--gold); }
+  .ctrl select { min-width: 0; width: 100%; min-height: 38px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); max-width: 100%; }
+  .swatch { width: 44px; height: 34px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); cursor: pointer; }
+  .rule.changed, .decl.changed { background: var(--gold-soft); }
+  .file-tab {
+    display: inline-block; margin: 4px 0 0 40px; padding: 2px 10px; border-radius: 6px 6px 0 0;
+    background: var(--brown); color: var(--cream); font-size: 0.8rem;
+  }
+  .file-body { margin-left: 40px; border: 2px solid var(--brown); border-radius: 0 8px 8px 8px; padding: 2px 4px; }
+
+  .readout {
+    margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--euc-soft);
+    font-size: 0.92rem; display: grid; gap: 4px;
+  }
+  .readout b { color: var(--euc-ink); }
+  .readout .ro-title { font-weight: 700; color: var(--euc-ink); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* rule anatomy legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 4px; align-items: stretch; margin: 6px 0 4px; }
+  .lg { display: grid; grid-template-rows: auto auto; justify-items: center; gap: 4px; min-width: 34px; }
+  .lg .tok {
+    font-family: var(--code); font-size: 1.15rem; font-weight: 700; padding: 6px 10px; border-radius: 8px;
+    background: var(--white); border: 2px solid var(--line);
+  }
+  .lg .cap { font-size: 0.72rem; line-height: 1.2; text-align: center; color: var(--muted); max-width: 92px; }
+  .lg .cap b { display: block; color: var(--brown); font-size: 0.74rem; letter-spacing: 0.03em; }
+  .lg.s .tok { border-color: var(--euc); color: var(--euc-ink); }
+  .lg.p .tok { border-color: #d89c8f; color: #a03c28; }
+  .lg.v .tok { border-color: var(--gold); color: var(--gold-ink); }
+  .decl-bracket {
+    margin: 2px 0 6px; padding: 6px 10px; border-left: 4px solid var(--gold); background: var(--white);
+    border-radius: 0 8px 8px 0; font-size: 0.9rem;
+  }
+
+  /* box model diagram */
+  .bm-wrap { margin-top: 12px; }
+  .bm {
+    position: relative; display: grid; grid-template-columns: 44px 1fr 44px; grid-template-rows: 26px auto 26px;
+    align-items: center; justify-items: center; border: 1px dashed rgba(53,35,26,0.45); font-family: var(--code); font-size: 0.85rem;
+  }
+  .bm > .lbl { position: absolute; top: 3px; left: 6px; font-family: var(--sans); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .bm > .t { grid-column: 2; grid-row: 1; }
+  .bm > .l { grid-column: 1; grid-row: 2; }
+  .bm > .r { grid-column: 3; grid-row: 2; }
+  .bm > .b { grid-column: 2; grid-row: 3; }
+  .bm > .in { grid-column: 2; grid-row: 2; width: 100%; }
+  .bm.margin { background: #f9cc9d; }
+  .bm.border { background: #fddd9b; border: 2px solid #35231a; }
+  .bm.padding { background: #c3d08b; }
+  .bm.content { display: block; background: #8cb6c0; text-align: center; padding: 10px 4px; font-weight: 700; border-style: solid; }
+  .formula { margin-top: 8px; font-size: 0.92rem; }
+
+  /* ---------- preview panel ---------- */
+  .stage {
+    position: sticky; top: 12px; height: calc(100vh - 24px); min-height: 520px;
+    display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  }
+  .browser {
+    flex: 1 1 auto; display: flex; flex-direction: column; background: var(--white);
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 6px 20px rgba(53,35,26,0.08); min-height: 0;
+  }
+  .browser-bar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f1e8d6; border-bottom: 1px solid var(--line);
+    font-size: 0.85rem; color: var(--muted);
+  }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 10px; height: 10px; border-radius: 50%; background: #d8c8ae; display: block; }
+  .url { flex: 1; background: var(--white); border-radius: 999px; padding: 2px 12px; font-family: var(--code); font-size: 0.8rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  #preview { flex: 1 1 auto; width: 100%; border: 0; background: var(--white); min-height: 200px; display: block; }
+  .explain {
+    flex: none; background: var(--white); border: 1px solid var(--line); border-left: 6px solid var(--gold);
+    border-radius: 12px; padding: 10px 14px; max-height: 34vh; overflow: auto;
+  }
+  .explain h2 { font-family: var(--sans); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold-ink); margin-bottom: 4px; }
+  .explain p { margin: 0 0 6px; }
+  .explain p:last-child { margin-bottom: 0; }
+  .explain .use { color: var(--euc-ink); }
+
+  /* ---------- challenges ---------- */
+  .challenges { padding: 0 20px 40px; }
+  .challenges > h2 { font-size: 1.6rem; margin: 10px 0 4px; }
+  .challenges > p { margin: 0 0 14px; color: var(--muted); }
+  .ch-list { display: grid; gap: 16px; }
+  .challenge { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .challenge h3 { font-size: 1.15rem; margin-bottom: 4px; }
+  .challenge .task { margin: 0 0 10px; color: var(--muted); }
+  .ch-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .ch-grid label { font-weight: 600; font-size: 0.9rem; display: block; margin-bottom: 4px; }
+  .ch-grid textarea {
+    width: 100%; min-height: 150px; font-family: var(--code); font-size: 1rem; padding: 10px; border-radius: 10px;
+    border: 2px solid var(--line); background: var(--white); color: var(--brown); resize: vertical; tab-size: 2;
+  }
+  .ch-grid textarea:focus { border-color: var(--gold); outline: none; }
+  .ch-grid iframe { width: 100%; height: 190px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); display: block; }
+  .ch-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+  .feedback { margin: 0; padding: 8px 12px; border-radius: 10px; font-weight: 600; }
+  .feedback:empty { display: none; }
+  .feedback.ok { background: var(--euc-soft); color: var(--euc-ink); }
+  .feedback.no { background: #fbeee0; color: #8a4b12; }
+
+  footer.page-foot { padding: 0 20px 30px; color: var(--muted); font-size: 0.85rem; }
+
+  /* ---------- phone ---------- */
+  @media (max-width: 860px) {
+    .work { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 12px; }
+    .top { padding: 12px 16px; }
+    .stage {
+      position: sticky; top: auto; bottom: 0; height: auto; min-height: 0; z-index: 5;
+      background: var(--cream); padding: 8px 0 6px; box-shadow: 0 -8px 16px rgba(53,35,26,0.12);
+      margin: 0 -12px; padding-left: 12px; padding-right: 12px;
+    }
+    #preview { height: 36vh; flex: none; }
+    .explain { max-height: 16vh; font-size: 0.92rem; }
+    .ctrl { padding-left: 6px; }
+    .decls { padding-left: 8px; }
+    .rule-foot { padding-left: 30px; }
+    .file-tab, .file-body { margin-left: 8px; }
+    .ch-grid { grid-template-columns: minmax(0, 1fr); }
+    .challenges { padding: 0 12px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1>CSS toggles <span>·</span> Wattle &amp; Chai</h1>
+    <p>Tick and untick each line of CSS, like the Styles panel in DevTools. Watch the café page change on the right.</p>
+  </div>
+  <div class="top-actions">
+    <a class="btn link-btn" href="html-toggles.html">Go to HTML toggles →</a>
+    <button class="btn primary" type="button" id="reset-all">Reset all</button>
+  </div>
+</header>
+
+<div class="work">
+  <div class="sections" id="sections"></div>
+
+  <aside class="stage" aria-label="Live preview">
+    <div class="browser">
+      <div class="browser-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="url">wattle-and-chai/index.html</span></div>
+      <iframe id="preview" title="Live preview of the Wattle and Chai page"></iframe>
+    </div>
+    <section class="explain" aria-live="polite">
+      <h2>What just happened</h2>
+      <div id="explain-body">
+        <p>Every rule below is switched <b>on</b>, so the page looks finished. Untick any line to switch it off and see what it was doing.</p>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<section class="challenges" aria-labelledby="ch-title">
+  <h2 id="ch-title">Now type it</h2>
+  <p>Your turn. Type the CSS yourself. The little preview updates as you type. Press <b>Check it</b> when you're ready. There's no score and no timer.</p>
+  <div class="ch-list" id="ch-list"></div>
+</section>
+
+<footer class="page-foot">Made for Class 1 · How a web page is built. Everything here runs in your browser — nothing is sent anywhere.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ================= the lamingtons picture (from 00-css-basics/images/lamingtons.svg) ================= */
+  var LAMINGTONS_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" width="1200" height="500"><title>Three lamingtons on a plate</title><defs><pattern id="coconut" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r="2" fill="#fffaf0"/><circle cx="13" cy="3" r="1.5" fill="#fffaf0"/><circle cx="9" cy="12" r="2" fill="#fffaf0"/><circle cx="16" cy="15" r="1.4" fill="#fffaf0"/><circle cx="2" cy="16" r="1.2" fill="#fffaf0"/></pattern><g id="lamington"><polygon points="0,0 130,-75 260,0 130,75" fill="#7a4630"/><polygon points="0,0 130,75 130,225 0,150" fill="#4e2a1a"/><polygon points="130,75 260,0 260,150 130,225" fill="#613622"/><polygon points="0,0 130,-75 260,0 130,75" fill="url(#coconut)" opacity="0.85"/><polygon points="0,0 130,75 130,225 0,150" fill="url(#coconut)" opacity="0.6"/><polygon points="130,75 260,0 260,150 130,225" fill="url(#coconut)" opacity="0.7"/></g></defs><rect width="1200" height="500" fill="#fbf6ea"/><path d="M40 470 C120 380 160 300 170 200" stroke="#6b8f7d" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#8fb3a1"><ellipse cx="120" cy="400" rx="30" ry="18" transform="rotate(-30 120 400)"/><ellipse cx="170" cy="330" rx="28" ry="17" transform="rotate(20 170 330)"/><ellipse cx="135" cy="290" rx="26" ry="16" transform="rotate(-40 135 290)"/><ellipse cx="180" cy="230" rx="24" ry="15" transform="rotate(10 180 230)"/></g><ellipse cx="620" cy="400" rx="420" ry="80" fill="#8a5d38" opacity="0.18"/><ellipse cx="620" cy="390" rx="410" ry="78" fill="#ffffff" stroke="#e8dcc6" stroke-width="4"/><use href="#lamington" x="300" y="170"/><use href="#lamington" x="640" y="170"/><use href="#lamington" x="470" y="230"/></svg>';
+  var LAMINGTONS = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(LAMINGTONS_SVG);
+
+  /* ================= the café page shown in the preview (never changes; only the CSS does) ================= */
+  function pageBody(inlineStyle) {
+    return '' +
+'<header class="site-header">\n' +
+'  <div class="brand">\n' +
+'    <h1 id="cafe-name">Wattle &amp; Chai</h1>\n' +
+'    <p class="tagline"' + (inlineStyle ? ' style="' + inlineStyle + '"' : '') + '>Flat whites, momos and good company · Melbourne</p>\n' +
+'  </div>\n' +
+'  <nav class="nav"><a href="#menu">Menu</a> <a href="#visit">Visit</a> <a href="#order">Order</a></nav>\n' +
+'</header>\n' +
+'<main>\n' +
+'  <img class="hero-img" src="' + LAMINGTONS + '" width="1200" height="500" alt="Three chocolate and coconut lamingtons on a white plate">\n' +
+'  <h2>Today\'s special</h2>\n' +
+'  <p>Lamingtons, made fresh every morning: sponge, chocolate and coconut.</p>\n' +
+'  <p class="price" id="special-price">Only $6.00 today</p>\n' +
+'  <p class="box-demo">I am a box: content, padding, border and margin. Our longest word: Lamingtonsforbreakfastlunchanddinner</p>\n' +
+'  <h2 id="menu">Also on the menu</h2>\n' +
+'  <div class="menu-grid">\n' +
+'    <article class="card"><h3>Flat White</h3><p>Smooth and strong, Melbourne style.</p><b>$5.50</b></article>\n' +
+'    <article class="card"><h3>Chicken Momo</h3><p>Steamed dumplings with tomato achar.</p><b>$16.00</b></article>\n' +
+'    <article class="card"><h3>Masala Chai</h3><p>Black tea, milk and warm spices.</p><b>$5.00</b></article>\n' +
+'  </div>\n' +
+'  <button class="btn" type="button">Order a lamington</button>\n' +
+'</main>\n' +
+'<footer class="site-footer" id="visit">© 2026 Wattle &amp; Chai · 12 Wattle Lane, Melbourne · Built in class</footer>\n';
+  }
+
+  /* ================= all the CSS, section by section =================
+     kind: "css" = a normal rule in a stylesheet (reset.css or styles.css)
+           "inline" = a style="" attribute, "block" = a <style> block, "link" = a linked .css file
+     Each declaration: p = property, v = value, does = what it does (on), off = what you see without it. */
+  var SECTIONS = [
+    {
+      id: "anatomy", num: 1, title: "Rule anatomy",
+      intro: "A CSS rule says <b>who</b> to style and <b>how</b>. The <b>selector</b> picks the elements. Each <b>declaration</b> is <code>property: value;</code>. Untick a line to switch it off.",
+      extra: legendHtml(),
+      rules: [
+        { id: "body", file: "styles.css", sel: "body", cmt: "element selector: the whole page",
+          why: "Styling <code>body</code> sets the look for the whole page. Text inside it inherits the colour and font.",
+          decls: [
+            { p: "color", v: "#35231a", color: true, does: "Every bit of text on the page turns coffee brown. Children inherit the colour from body.", off: "The text goes back to the browser's default black." },
+            { p: "background", v: "#fbf6ea", color: true, does: "The whole page is painted cream.", off: "The page goes back to the browser's default white." },
+            { p: "font-family", v: "\"Segoe UI\", Roboto, Arial, sans-serif", does: "The page uses a clean, modern font. It is a list: if Segoe UI is missing, the browser tries Roboto, then Arial.", off: "The browser uses its default font, usually Times New Roman (a serif font with little 'feet')." },
+            { p: "padding", v: "24px", slider: { min: 0, max: 60, tpl: "{n}px", n: 24 }, does: "There is 24px of space inside the edge of the page.", off: "Everything sits right against the edge of the page.", slide: "Padding is space INSIDE an element. On body, it's the gap around the whole page." }
+          ] },
+        { id: "header", file: "styles.css", sel: ".site-header", cmt: "class selector: every element with class=\"site-header\"",
+          why: "A class rule can style many elements. Here it turns the header into a white card.",
+          decls: [
+            { p: "padding", v: "16px 20px", does: "Space inside the header: 16px top and bottom, 20px left and right.", off: "The name and tagline touch the edge of the white card." },
+            { p: "background", v: "#ffffff", color: true, does: "The header is painted white, so it stands out from the cream page.", off: "The header is see-through, so you see the cream page behind it." },
+            { p: "border-radius", v: "16px", slider: { min: 0, max: 40, tpl: "{n}px", n: 16 }, does: "The header's corners are rounded.", off: "The corners are sharp and square.", slide: "Bigger border-radius = rounder corners." },
+            { p: "margin-bottom", v: "20px", does: "20px of space under the header, before the picture.", off: "The picture sits right under the header." }
+          ] },
+        { id: "h2", file: "styles.css", sel: "h2", cmt: "element selector: every <h2>",
+          why: "Element selectors are good for things that should look the same everywhere, like all your headings.",
+          decls: [
+            { p: "margin-top", v: "28px", does: "Each &lt;h2&gt; gets 28px of space above it, so new parts of the page are easy to spot.", off: "The headings sit close to the content above them." },
+            { p: "margin-bottom", v: "8px", does: "A small gap under each &lt;h2&gt;.", off: "The text under each heading moves up." }
+          ] }
+      ]
+    },
+    {
+      id: "attach", num: 2, title: "Attaching CSS — three ways",
+      intro: "CSS can live in three places. Each way below styles a different part of the page, so you can switch them one at a time.",
+      rules: [
+        { id: "inline", kind: "inline", sel: ".tagline", cmt: "Way 1 · inline: a style=\"\" attribute on ONE tag",
+          why: "Inline styles touch only ONE element. Ten cards = ten edits, so real sites use them rarely. They also beat every rule in a stylesheet.",
+          offRule: "The tagline loses its green italic look. Now the normal rules from the stylesheet style it.",
+          decls: [
+            { p: "color", v: "#4f8a6e", color: true, does: "The tagline turns eucalyptus green, only this one paragraph.", off: "The tagline goes back to the colour from the stylesheet." },
+            { p: "font-style", v: "italic", does: "The tagline leans to the right (italic).", off: "The tagline stands up straight again." }
+          ] },
+        { id: "block", kind: "block", sel: "h2", cmt: "Way 2 · a <style> block in the <head> of this page",
+          why: "A &lt;style&gt; block styles every matching element on THIS page only. Another page would not get it.",
+          offRule: "Both &lt;h2&gt; headings lose their gold underline.",
+          decls: [
+            { p: "border-bottom", v: "3px solid #d18f00", does: "Every &lt;h2&gt; on this page gets a gold line under it.", off: "The gold line under the headings is gone." },
+            { p: "padding-bottom", v: "4px", does: "A little space between the heading text and its gold line.", off: "The gold line sits tight under the letters." }
+          ] },
+        { id: "link", kind: "link", file: "cafe.css", sel: ".site-footer", cmt: "Way 3 · a separate .css file, linked in the <head>",
+          why: "A linked stylesheet is a separate .css file. Every page that links it gets the same look — change a colour once and the whole site changes. This is how real sites do it.",
+          offRule: "The footer loses its dark brown style. Every page that linked cafe.css would lose it too.",
+          decls: [
+            { p: "background", v: "#35231a", color: true, does: "The footer is painted dark coffee brown.", off: "The footer has no background colour." },
+            { p: "color", v: "#fbf6ea", color: true, does: "The footer text is cream, so you can read it on the dark background.", off: "The footer text goes back to the page's brown text colour." },
+            { p: "padding", v: "14px 18px", does: "Space inside the footer.", off: "The footer text touches the edge of its box." },
+            { p: "border-radius", v: "12px", does: "Rounded corners on the footer.", off: "Square corners on the footer." },
+            { p: "margin-top", v: "28px", does: "Space above the footer.", off: "The footer sits right under the button." }
+          ] }
+      ]
+    },
+    {
+      id: "reset", num: 3, title: "The reset (reset.css)",
+      intro: "Every browser adds its own default styles — margins, sizes, fonts — and Chrome, Safari and Firefox are all a bit different. A <b>reset</b> clears the messy parts, so we start from the same place. Untick a rule to bring the browser's defaults back.",
+      rules: [
+        { id: "r1", file: "reset.css", sel: "*, *::before, *::after", flash: ".box-demo", cmt: "1. width and height include padding and border",
+          why: "With border-box, the maths is easy: a 300px box stays 300px, even when you add padding and a border.",
+          decls: [
+            { p: "box-sizing", v: "border-box", does: "The dashed box is exactly 300px wide. Padding and border fit INSIDE the 300px.", off: "The browser adds the padding and border ON TOP of the width: 300 + 20 + 20 + 4 + 4 = 348px. Look at the measured width below." }
+          ] },
+        { id: "r2", file: "reset.css", sel: "*", flash: "body, h1, h3, p", cmt: "2. remove the default margins on everything",
+          why: "Browsers put margins on body, headings and paragraphs. Removing them means WE decide all the spacing.",
+          decls: [
+            { p: "margin", v: "0", does: "All the browser's default margins are gone. Only the spacing we wrote ourselves is left.", off: "The default margins come back: an 8px gap around the whole page, and extra space around the name, tagline and paragraphs." }
+          ] },
+        { id: "r3", file: "reset.css", sel: "body", flash: "main p", cmt: "3. easier-to-read text: more space between lines",
+          why: "Lines with a bit more space are easier to read, especially for long paragraphs.",
+          decls: [
+            { p: "line-height", v: "1.5", does: "Each line is 1.5 times as tall as the text, so lines have room to breathe.", off: "Lines of text squeeze closer together (the default is about 1.2)." }
+          ] },
+        { id: "r4", file: "reset.css", sel: "img, svg", flash: ".hero-img", cmt: "4. images never spill out of their box",
+          why: "Big photos must not break phone layouts. This rule makes every image shrink to fit its space.",
+          decls: [
+            { p: "display", v: "block", does: "The image is a block, so there is no odd little gap under it.", off: "The image sits on a line of text like a letter, so a small gap appears under it." },
+            { p: "max-width", v: "100%", does: "The 1200px picture is never wider than the space it is in.", off: "The picture is 1200px wide again. It spills off the right side and the page scrolls sideways." },
+            { p: "height", v: "auto", does: "The picture keeps its shape when it shrinks.", off: "The picture keeps its 500px height while its width shrinks, so it looks squashed." }
+          ] },
+        { id: "r5", file: "reset.css", sel: "button, input, select, textarea", flash: ".btn", cmt: "5. form controls use the page's font",
+          why: "Without this, buttons and inputs use a small system font that doesn't match the rest of your page.",
+          decls: [
+            { p: "font", v: "inherit", does: "The button uses the same font and size as the page around it.", off: "The button goes back to the browser's small system font (about 13px)." }
+          ] },
+        { id: "r6", file: "reset.css", sel: "p, h1, h2, h3", flash: ".box-demo", cmt: "6. long words wrap instead of running off the screen",
+          why: "One very long word (or a long web address) can push a phone page sideways. This rule stops that.",
+          decls: [
+            { p: "overflow-wrap", v: "break-word", does: "The long word in the dashed box breaks onto the next line.", off: "The long word in the dashed box runs out past the dashed border." }
+          ] }
+      ]
+    },
+    {
+      id: "wins", num: 4, title: "Selectors & which rule wins",
+      intro: "Three kinds of selector all point at the same price: <code>&lt;p class=\"price\" id=\"special-price\"&gt;</code>. Rule 1: the more specific selector wins — <b>id &gt; class &gt; element</b>. Rule 2: if two rules are equally strong, the <b>later</b> one wins. That is the <b>cascade</b>.",
+      rules: [
+        { id: "p", file: "styles.css", sel: "p", flash: "#special-price", cmt: "element selector: every <p> — the weakest",
+          why: "An element selector matches every element of that type. It's the weakest of the three.",
+          decls: [
+            { p: "color", v: "#75604f", does: "Every paragraph is a soft brown-grey.", off: "Paragraphs go back to the body's coffee-brown colour." },
+            { p: "margin-bottom", v: "12px", does: "A gap under every paragraph.", off: "Paragraphs sit right on top of each other." }
+          ] },
+        { id: "price1", file: "styles.css", sel: ".price", flash: "#special-price", cmt: "class selector: starts with a dot — stronger",
+          why: "A class selector beats an element selector. Classes are what real sites use most.",
+          decls: [
+            { p: "color", v: "#d18f00", does: "This rule wants the price to be wattle gold.", off: "This rule stops asking for gold." },
+            { p: "font-weight", v: "700", does: "The price is bold.", off: "The price is normal weight." },
+            { p: "font-size", v: "1.3rem", does: "This rule wants the price at 1.3rem.", off: "This rule stops asking for 1.3rem." }
+          ] },
+        { id: "special", file: "styles.css", sel: "#special-price", flash: "#special-price", cmt: "id selector: starts with # — the strongest",
+          why: "Only ONE element can have an id. An id selector beats classes and elements. Real sites mostly style with classes; ids are handy for links and JavaScript.",
+          decls: [
+            { p: "color", v: "rgb(79, 138, 110)", does: "The id rule asks for eucalyptus green — and an id is the strongest, so it wins.", off: "The id rule is gone. The next strongest colour rule wins now." }
+          ] },
+        { id: "price2", file: "styles.css", sel: ".price", flash: "#special-price", cmt: "the SAME class again, lower in the file → the later rule wins",
+          why: "When two rules are equally strong, the one LOWER in the file wins. Like water flowing down the file.",
+          decls: [
+            { p: "font-size", v: "1.5rem", does: "Both .price rules set font-size. They are equally strong, so this later one wins: 1.5rem (24px).", off: "The earlier .price rule wins the font-size now: 1.3rem (about 21px)." }
+          ] }
+      ]
+    },
+    {
+      id: "colours", num: 5, title: "Colours and fonts",
+      intro: "Three ways to write a colour: a <b>name</b> (<code>white</code>), <b>hex</b> (<code>#d18f00</code> = #RRGGBB, red-green-blue from 00 to ff) and <b>rgb</b> (<code>rgb(53, 35, 26)</code>, from 0 to 255). Click a colour square to pick a new colour. Fonts: <code>font-family</code> is a list — if the first font is missing, the browser tries the next.",
+      rules: [
+        { id: "cafename", file: "styles.css", sel: "#cafe-name", cmt: "a HEX colour",
+          why: "Hex colours are the most common way to write a colour in CSS. #d18f00 is our wattle gold.",
+          decls: [
+            { p: "color", v: "#d18f00", color: true, does: "The café name turns wattle gold. d1 = lots of red, 8f = some green, 00 = no blue.", off: "The café name goes back to the page's brown text colour." }
+          ] },
+        { id: "btn", file: "styles.css", sel: ".btn", cmt: "a NAME, a HEX and an RGB colour in one rule",
+          why: "A button needs colour, space and shape so people know they can tap it.",
+          decls: [
+            { p: "color", v: "white", color: true, does: "The button text is white — a colour NAME.", off: "The button text goes back to black." },
+            { p: "background", v: "#d18f00", color: true, does: "The button is wattle gold — a HEX colour.", off: "The button goes back to the browser's grey button colour." },
+            { p: "border", v: "2px solid rgb(53, 35, 26)", does: "A dark brown border — an RGB colour.", off: "The button goes back to the browser's thin grey border." },
+            { p: "padding", v: "10px 18px", does: "Space inside the button, so it's a good size to tap.", off: "The button shrinks tight around its words." },
+            { p: "border-radius", v: "999px", does: "A very big radius makes a pill shape.", off: "The button has square corners." },
+            { p: "cursor", v: "pointer", does: "The mouse turns into a pointing hand over the button.", off: "The mouse stays an arrow over the button. Hover it in the preview to see." }
+          ] },
+        { id: "fonts", file: "styles.css", sel: "h1, h2", cmt: "a font LIST: try Georgia, then Times New Roman, then any serif",
+          why: "Headings in a different font from the body text give a page personality.",
+          decls: [
+            { p: "font-family", v: "Georgia, \"Times New Roman\", serif", choices: ["Georgia, \"Times New Roman\", serif", "\"Segoe UI\", Roboto, Arial, sans-serif", "\"Courier New\", Courier, monospace", "\"Comic Sans MS\", \"Comic Neue\", cursive"], does: "The headings use Georgia, a serif font with little 'feet'.", off: "The headings use the body's font instead.", slide: "The last word in the list (serif, sans-serif, monospace, cursive) is a general family every computer has — the backup plan." }
+          ] },
+        { id: "h1size", file: "styles.css", sel: "h1", cmt: "font size",
+          why: "Size shows what matters most. The café name is the biggest text on the page.",
+          decls: [
+            { p: "font-size", v: "40px", slider: { min: 16, max: 72, tpl: "{n}px", n: 40 }, does: "The café name is 40px tall. (In the lesson file this is 2.5rem: 2.5 × 16px = 40px.)", off: "The heading goes back to the browser's default h1 size (32px).", slide: "Drag the slider and watch the café name grow and shrink." }
+          ] },
+        { id: "tagline", file: "styles.css", sel: ".tagline", cmt: "font weight and friends",
+          why: "Small capital letters with extra spacing make a neat tagline.",
+          decls: [
+            { p: "font-weight", v: "700", choices: ["300", "400", "700", "900"], does: "The tagline is bold (700). 400 is normal, 700 is bold.", off: "The tagline is normal weight (400).", slide: "font-weight goes from thin (100) to very heavy (900). 400 = normal, 700 = bold. Some fonts only have a few weights." },
+            { p: "text-transform", v: "uppercase", does: "The tagline shows in CAPITAL LETTERS — without changing the HTML.", off: "The tagline shows the letters as typed in the HTML." },
+            { p: "letter-spacing", v: "0.08em", does: "A little extra space between letters.", off: "The letters sit at normal spacing." },
+            { p: "font-size", v: "0.85rem", does: "The tagline is a bit smaller than normal text.", off: "The tagline is normal text size." }
+          ] }
+      ]
+    },
+    {
+      id: "box", num: 6, title: "The box model",
+      intro: "Every element is a box. From the inside out: <b>content → padding → border → margin</b>. Like a framed photo: the photo, the white mat, the frame, and the space on the wall. Drag the sliders and watch the diagram.",
+      rules: [
+        { id: "boxdemo", file: "styles.css", sel: ".box-demo", cmt: "the dashed box in the preview",
+          why: "The box model is how every layout works: cards, buttons, headers. DevTools shows this same diagram in Elements → Computed.",
+          decls: [
+            { p: "width", v: "300px", slider: { min: 120, max: 460, tpl: "{n}px", n: 300 }, does: "The box is 300px wide.", off: "The box stretches to the full width of the page.", slide: "Width sets how wide the box is." },
+            { p: "padding", v: "20px", slider: { min: 0, max: 60, tpl: "{n}px", n: 20 }, does: "20px of space INSIDE the border, all round the text.", off: "The text touches the dashed border.", slide: "Padding is space INSIDE the border. With border-box, more padding means less room for the content — the box stays the same width." },
+            { p: "border", v: "4px dashed #d18f00", slider: { min: 0, max: 20, tpl: "{n}px dashed #d18f00", n: 4 }, does: "A 4px dashed gold line around the box.", off: "No border line.", slide: "The border is the line around the box, between padding and margin." },
+            { p: "margin", v: "24px 0", slider: { min: 0, max: 60, tpl: "{n}px 0", n: 24 }, does: "24px of space OUTSIDE the box, above and below.", off: "The box sits right against the price and the heading.", slide: "Margin is space OUTSIDE the border. It pushes other boxes away. (24px 0 = 24px top and bottom, 0 left and right.)" },
+            { p: "background", v: "#ffffff", color: true, does: "The box is white inside. Background fills the content AND the padding.", off: "The box is see-through." }
+          ] }
+      ]
+    },
+    {
+      id: "layout", num: 7, title: "A first look at layout",
+      intro: "Two layout tools: <b>Flexbox</b> puts things in a row (like people on a bench) and <b>Grid</b> makes rows and columns (like an egg carton). Plus a <b>hover transition</b>: hover a menu card in the preview.",
+      rules: [
+        { id: "flex", file: "styles.css", sel: ".site-header", flash: ".site-header", cmt: "Flexbox: the header's children sit in a row",
+          why: "Almost every website header uses Flexbox: logo on the left, menu on the right.",
+          decls: [
+            { p: "display", v: "flex", does: "The name and the nav sit side by side in one row. The nav jumps up next to the name.", off: "The header's children stack again, one under the other: the nav drops below the name." },
+            { p: "justify-content", v: "space-between", choices: ["space-between", "flex-start", "center", "flex-end"], does: "The space is shared out: name on the left, nav pushed to the right.", off: "Everything bunches up at the start (the left).", slide: "justify-content decides where the items sit along the row." },
+            { p: "align-items", v: "center", does: "The items line up in the middle, top to bottom.", off: "The items stretch to the same height and line up at the top." },
+            { p: "gap", v: "12px", does: "12px of space between the items.", off: "No space between the items." }
+          ] },
+        { id: "nav", file: "styles.css", sel: ".nav a", cmt: "descendant selector: every <a> inside .nav",
+          why: "Navigation links usually look different from links in normal text.",
+          decls: [
+            { p: "color", v: "#2f6b50", color: true, does: "The nav links are eucalyptus green.", off: "The nav links go back to the browser's default blue." },
+            { p: "font-weight", v: "600", does: "The nav links are semi-bold.", off: "The nav links are normal weight." },
+            { p: "text-decoration", v: "none", does: "No underline on the nav links.", off: "The browser's default underline comes back." },
+            { p: "margin-left", v: "10px", does: "Space to the left of each link.", off: "The links sit closer together." }
+          ] },
+        { id: "grid", file: "styles.css", sel: ".menu-grid", flash: ".menu-grid", cmt: "Grid: rows and columns",
+          why: "Grid is great for menus, product lists and photo galleries.",
+          decls: [
+            { p: "display", v: "grid", does: "The three menu cards sit side by side in columns.", off: "The cards stack, one under the other — the normal flow of the page." },
+            { p: "grid-template-columns", v: "repeat(3, 1fr)", choices: ["repeat(3, 1fr)", "repeat(2, 1fr)", "1fr", "2fr 1fr 1fr"], does: "Three columns, each one equal share (1fr) of the space.", off: "Only one column, so the cards stack.", slide: "fr means 'a fraction of the free space'. 2fr 1fr 1fr = the first column is twice as wide." },
+            { p: "gap", v: "12px", does: "12px of space between the cards.", off: "The cards touch each other." }
+          ] },
+        { id: "card", file: "styles.css", sel: ".card", flash: ".card", cmt: "each menu card, with a smooth transition",
+          why: "A small, smooth movement tells people 'you can click this'. Without a transition, the change is a sudden jump.",
+          decls: [
+            { p: "background", v: "#ffffff", color: true, does: "The cards are white.", off: "The cards are see-through." },
+            { p: "border", v: "1px solid #e8dcc6", does: "A thin line around each card.", off: "No line around the cards." },
+            { p: "border-radius", v: "12px", does: "Rounded corners on the cards.", off: "Square corners on the cards." },
+            { p: "padding", v: "12px", does: "Space inside each card.", off: "The text touches the edge of each card." },
+            { p: "transition", v: "transform 0.25s ease, box-shadow 0.25s ease", choices: ["transform 0.25s ease, box-shadow 0.25s ease", "transform 2s ease, box-shadow 2s ease"], does: "Hover a card: it lifts SMOOTHLY, like a dimmer switch.", off: "Hover a card: it JUMPS up with no animation, like an on/off switch.", slide: "Try 2s and hover a card: slow-motion lift." }
+          ] },
+        { id: "hover", file: "styles.css", sel: ".card:hover", flash: ".card", cmt: ":hover = only while the mouse is over it",
+          why: ":hover styles show people what they can click. On a phone, tapping a card counts as hover.",
+          decls: [
+            { p: "transform", v: "translateY(-6px)", does: "When you hover a card, it moves up 6px.", off: "Hovered cards don't move." },
+            { p: "box-shadow", v: "0 8px 18px rgba(53, 35, 26, 0.18)", does: "When you hover a card, a soft shadow appears under it.", off: "No shadow on hover." }
+          ] }
+      ]
+    }
+  ];
+
+  function legendHtml() {
+    var parts = [
+      ["s", "body", "SELECTOR", "who to style"],
+      ["", "{", "", "the rule starts"],
+      ["p", "color", "PROPERTY", "what to change"],
+      ["", ":", "", "a colon"],
+      ["v", "#35231a", "VALUE", "change it to"],
+      ["", ";", "", "ends the line"],
+      ["", "}", "", "the rule ends"]
+    ];
+    var h = '<div class="legend" role="img" aria-label="Rule anatomy: selector body, open brace, property color, colon, value #35231a, semicolon, close brace">';
+    parts.forEach(function (x) {
+      h += '<div class="lg ' + x[0] + '"><span class="tok">' + esc(x[1]) + '</span><span class="cap">' + (x[2] ? '<b>' + x[2] + '</b>' : '') + x[3] + '</span></div>';
+    });
+    h += '</div><p class="decl-bracket"><code>color: #35231a;</code> is one <b>declaration</b> = <b>property</b> : <b>value</b> ; — like an instruction to a painter: “All bedrooms: walls blue.”</p>';
+    return h;
+  }
+
+  /* ================= state ================= */
+  var RULES = [];          // flat list, in the order they appear
+  var BY_ID = {};
+  SECTIONS.forEach(function (sec) {
+    sec.rules.forEach(function (r) {
+      r.kind = r.kind || "css";
+      r.sec = sec.id;
+      RULES.push(r);
+      BY_ID[r.id] = r;
+    });
+  });
+
+  var S; // S.rules[id] = {on}, S.decls[id][i] = {on, v, n}
+  function freshState() {
+    var s = { rules: {}, decls: {} };
+    RULES.forEach(function (r) {
+      s.rules[r.id] = { on: true };
+      s.decls[r.id] = r.decls.map(function (d) {
+        return { on: true, v: d.v, n: d.slider ? d.slider.n : null };
+      });
+    });
+    return s;
+  }
+  S = freshState();
+
+  /* ================= helpers ================= */
+  function $(q, root) { return (root || document).querySelector(q); }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function declsText(r, indent) {
+    return S.decls[r.id].map(function (st, i) {
+      return st.on ? (indent || "") + r.decls[i].p + ": " + st.v + ";" : "";
+    }).filter(Boolean);
+  }
+  function ruleCss(r) {
+    if (!S.rules[r.id].on) return "";
+    var lines = declsText(r, "  ");
+    if (!lines.length) return "";
+    return r.sel + " {\n" + lines.join("\n") + "\n}\n";
+  }
+  function cssFor(filter) {
+    return RULES.filter(filter).map(ruleCss).join("");
+  }
+  function resetCss() { return "/* reset.css */\n" + cssFor(function (r) { return r.kind === "css" && r.file === "reset.css"; }); }
+  function stylesCss() { return "/* styles.css */\n" + cssFor(function (r) { return r.kind === "css" && r.file !== "reset.css"; }); }
+  function inlineAttr() {
+    var r = BY_ID.inline;
+    if (!S.rules.inline.on) return "";
+    return declsText(r).join(" ");
+  }
+  function blockCss() { return S.rules.block.on ? ruleCss(BY_ID.block) : ""; }
+  function linkHref() {
+    var css = S.rules.link.on ? ruleCss(BY_ID.link) : "";
+    return css ? "data:text/css;charset=utf-8," + encodeURIComponent("/* cafe.css */\n" + css) : "";
+  }
+  function toHex(v) {
+    if (/^#[0-9a-f]{6}$/i.test(v)) return v;
+    if (/^#[0-9a-f]{3}$/i.test(v)) return "#" + v.slice(1).split("").map(function (c) { return c + c; }).join("");
+    if (v === "white") return "#ffffff";
+    var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(v);
+    if (m) return "#" + [m[1], m[2], m[3]].map(function (x) { return ("0" + (+x).toString(16)).slice(-2); }).join("");
+    return "#000000";
+  }
+  function round(n) { return Math.round(n * 100) / 100; }
+  function pxs(v) { return round(parseFloat(v) || 0); }
+
+  /* ================= preview document ================= */
+  var TOOL_CSS = "@keyframes __flash{0%{outline-color:rgba(209,143,0,1)}100%{outline-color:rgba(209,143,0,0)}}" +
+    ".__flash{outline:3px solid rgba(209,143,0,0);outline-offset:3px;animation:__flash 1.4s ease-out}";
+
+  function buildDoc() {
+    var href = linkHref(), block = blockCss();
+    return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Wattle &amp; Chai</title>\n' +
+      '<style id="__tool">' + TOOL_CSS + '</style>\n' +
+      '<style id="reset-css">\n' + resetCss() + '</style>\n' +
+      '<style id="styles-css">\n' + stylesCss() + '</style>\n' +
+      (href ? '<link id="cafe-link" rel="stylesheet" href="' + href + '">\n' : '') +
+      (block ? '<style id="style-block">\n' + block + '</style>\n' : '') +
+      '</head>\n<body>\n' + pageBody(inlineAttr()) + '</body>\n</html>';
+  }
+
+  var frame = $("#preview");
+  var ready = false;
+  function fdoc() { return ready ? frame.contentDocument : null; }
+
+  function loadPreview(after) {
+    ready = false;
+    frame.onload = function () {
+      ready = true;
+      var d = frame.contentDocument;
+      d.addEventListener("click", function (e) {
+        var a = e.target.closest && e.target.closest("a");
+        if (a) e.preventDefault();
+      });
+      measureAll();
+      if (after) after();
+    };
+    frame.srcdoc = buildDoc();
+  }
+
+  // Apply the current state to the live preview without reloading it (keeps scroll and hover).
+  function applyInPlace(onDone) {
+    var d = fdoc();
+    if (!d) { loadPreview(onDone); return; }
+    d.getElementById("reset-css").textContent = "\n" + resetCss();
+    d.getElementById("styles-css").textContent = "\n" + stylesCss();
+    // Way 3: the linked file
+    var href = linkHref(), link = d.getElementById("cafe-link");
+    var waitForLink = false;
+    if (href && !link) {
+      link = d.createElement("link"); link.id = "cafe-link"; link.rel = "stylesheet";
+      d.getElementById("styles-css").after(link);
+      waitForLink = true;
+    }
+    if (href && link && link.getAttribute("href") !== href) { link.href = href; waitForLink = true; }
+    if (!href && link) link.remove();
+    // Way 2: the <style> block
+    var block = blockCss(), sb = d.getElementById("style-block");
+    if (block && !sb) {
+      sb = d.createElement("style"); sb.id = "style-block";
+      (d.getElementById("cafe-link") || d.getElementById("styles-css")).after(sb);
+    }
+    if (block) sb.textContent = "\n" + block;
+    if (!block && sb) sb.remove();
+    // Way 1: the inline style attribute
+    var tag = d.querySelector(".tagline"), attr = inlineAttr();
+    if (attr) tag.setAttribute("style", attr); else tag.removeAttribute("style");
+
+    if (waitForLink) {
+      link.onload = function () { measureAll(); if (onDone) onDone(); };
+    } else {
+      measureAll(); if (onDone) onDone();
+    }
+  }
+
+  function flashPreview(sel) {
+    var d = fdoc();
+    if (!d || !sel) return;
+    var els;
+    try { els = d.querySelectorAll(sel); } catch (e) { return; }
+    if (!els.length) return;
+    els.forEach(function (el) {
+      el.classList.remove("__flash");
+      void el.offsetWidth;
+      el.classList.add("__flash");
+      setTimeout(function () { el.classList.remove("__flash"); }, 1500);
+    });
+    // scroll the first one into view, inside the preview only
+    var win = frame.contentWindow, first = els[0];
+    var rect = first.getBoundingClientRect(), vh = win.innerHeight;
+    if (rect.top < 0 || rect.top > vh - 40) {
+      win.scrollTo({ top: Math.max(0, rect.top + win.scrollY - vh * 0.3), behavior: "smooth" });
+    }
+  }
+  function flashSel(r) {
+    if (r.flash) return r.flash;
+    return r.sel.split(",").map(function (s) { return s.replace(/::?[a-z-]+(\([^)]*\))?/gi, "").trim(); }).filter(Boolean).join(", ") || "body";
+  }
+
+  /* ================= specificity: who wins on the price? ================= */
+  function specificity(sel) {
+    var a = 0, b = 0, c = 0;
+    var s = sel.replace(/::[a-z-]+/gi, function () { c++; return " "; })
+               .replace(/:[a-z-]+(\([^)]*\))?/gi, function () { b++; return " "; });
+    a += (s.match(/#[\w-]+/g) || []).length;
+    b += (s.match(/\.[\w-]+/g) || []).length + (s.match(/\[[^\]]*\]/g) || []).length;
+    c += (s.match(/(^|[\s>+~])[a-z][\w-]*/gi) || []).length;
+    return [a, b, c];
+  }
+  function cmpSpec(x, y) { for (var i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; }
+  function kindName(sp) { return sp[0] ? "id" : sp[1] ? "class" : sp[2] ? "element" : "everything (*)"; }
+
+  // Every enabled declaration of `prop` that reaches `el`, strongest first.
+  function candidates(el, prop) {
+    var order = RULES.filter(function (r) { return r.kind === "css" && r.file === "reset.css"; })
+      .concat(RULES.filter(function (r) { return r.kind === "css" && r.file !== "reset.css"; }))
+      .concat([BY_ID.link, BY_ID.block]);
+    var list = [];
+    order.forEach(function (r, idx) {
+      if (!S.rules[r.id].on) return;
+      var best = null;
+      r.sel.split(",").forEach(function (part) {
+        part = part.trim();
+        if (part.indexOf("::") >= 0) return;
+        var ok = false;
+        try { ok = el.matches(part); } catch (e) { ok = false; }
+        if (ok) { var sp = specificity(part); if (!best || cmpSpec(sp, best) > 0) best = sp; }
+      });
+      if (!best) return;
+      r.decls.forEach(function (d, i) {
+        var st = S.decls[r.id][i];
+        if (d.p === prop && st.on) list.push({ r: r, i: i, v: st.v, spec: best, order: idx });
+      });
+    });
+    list.sort(function (x, y) { return cmpSpec(y.spec, x.spec) || (y.order - x.order); });
+    return list;
+  }
+
+  /* ================= measuring the preview ================= */
+  function measureAll() {
+    var d = fdoc();
+    if (!d) return;
+    var w = frame.contentWindow, cs = function (el) { return w.getComputedStyle(el); };
+    var body = d.body, html = d.documentElement;
+    var q = function (s) { return d.querySelector(s); };
+    var out = {};
+
+    // 1 anatomy
+    var bcs = cs(body);
+    out.anatomy = row("Page background", "<code>" + bcs.backgroundColor + "</code>") +
+      row("Text colour", "<code>" + bcs.color + "</code>") +
+      row("Font in use", "<code>" + firstFont(bcs.fontFamily) + "</code>") +
+      row("Header padding", "<code>" + cs(q(".site-header")).padding + "</code>");
+
+    // 2 attach
+    var tag = q(".tagline"), tcs = cs(tag), h2 = q("h2"), foot = q(".site-footer"), fcs = cs(foot);
+    var tagFrom = tag.getAttribute("style") ? "the inline style=\"\" (it beats every stylesheet)" : "the stylesheet rules";
+    out.attach = row("Tagline colour", "<code>" + tcs.color + "</code> · " + tcs.fontStyle + " · from " + tagFrom) +
+      row("&lt;h2&gt; bottom border", "<code>" + (parseFloat(cs(h2).borderBottomWidth) ? cs(h2).borderBottomWidth + " " + cs(h2).borderBottomStyle : "none") + "</code>") +
+      row("Footer background", "<code>" + fcs.backgroundColor + "</code>" + (d.getElementById("cafe-link") ? " · cafe.css is linked" : " · cafe.css is not linked"));
+
+    // 3 reset
+    var box = q(".box-demo"), boxW = boxNumbers(cs(box)).total, img = q(".hero-img"), ir = img.getBoundingClientRect();
+    var spills = ir.right > q("main").getBoundingClientRect().right + 1;
+    var wordSpills = box.scrollWidth > box.clientWidth + 1;
+    var btn = q(".btn"), btcs = cs(btn), h1 = q("h1");
+    out.reset = row("Dashed box width", "<b>" + round(boxW) + "px</b> (box-sizing: <code>" + cs(box).boxSizing + "</code>)") +
+      row("Lamington picture", "<b>" + round(ir.width) + " × " + round(ir.height) + "px</b> · spills off the side: <b>" + (spills ? "yes — scroll the preview sideways" : "no") + "</b>") +
+      row("body margin", "<b>" + cs(body).marginTop + "</b> · &lt;h1&gt; margin-top: <b>" + cs(h1).marginTop + "</b> · tagline margin-top: <b>" + tcs.marginTop + "</b>") +
+      row("Line height of text", "<b>" + (bcs.lineHeight === "normal" ? "normal (about 1.2)" : bcs.lineHeight) + "</b>") +
+      row("Button font", "<b>" + btcs.fontSize + "</b> <code>" + firstFont(btcs.fontFamily) + "</code>") +
+      row("Long word in the box", "<b>" + (wordSpills ? "spills out" : "wraps") + "</b>");
+
+    // 4 which rule wins
+    var price = q("#special-price"), pcs = cs(price);
+    var cC = candidates(price, "color"), cF = candidates(price, "font-size");
+    out.wins = winLine("color", cC, pcs.color, "inherited from body (no rule sets it on the price)") +
+      winLine("font-size", cF, pcs.fontSize, "the normal text size") + rankHtml(cC, "color");
+    markLosers(cC, "color"); markLosers(cF, "font-size");
+
+    // 5 colours and fonts
+    out.colours = row("Café name", "<code>" + cs(h1).color + "</code> · " + cs(h1).fontSize + " · <code>" + firstFont(cs(h1).fontFamily) + "</code>") +
+      row("Button background", "<code>" + btcs.backgroundColor + "</code> · text <code>" + btcs.color + "</code>") +
+      row("Tagline weight", "<b>" + tcs.fontWeight + "</b> · size " + tcs.fontSize) +
+      '<div>The browser turns every colour into <code>rgb(…)</code>, whichever way you wrote it.</div>';
+
+    // 6 box model
+    out.box = boxModelHtml(cs(box));
+
+    // 7 layout
+    var hd = q(".site-header"), brand = q(".brand"), nav = q(".nav"), grid = q(".menu-grid"), gcs = cs(grid);
+    var beside = nav.getBoundingClientRect().top < brand.getBoundingClientRect().bottom - 4;
+    var cols = gcs.display.indexOf("grid") >= 0 && gcs.gridTemplateColumns !== "none" ? gcs.gridTemplateColumns.trim().split(/\s+/).length : 1;
+    var card = q(".card");
+    out.layout = row("Header", "display: <code>" + cs(hd).display + "</code> · the nav is <b>" + (beside ? "beside the name" : "below the name") + "</b>") +
+      row("Menu", "display: <code>" + gcs.display + "</code> · <b>" + cols + " column" + (cols > 1 ? "s" : "") + "</b>" + (cols > 1 ? " (" + gcs.gridTemplateColumns + ")" : " — the cards stack")) +
+      row("Card transition", "<code>" + (cs(card).transitionDuration === "0s" ? "none — hover jumps" : cs(card).transitionDuration + " (smooth)") + "</code>");
+
+    Object.keys(out).forEach(function (k) {
+      var el = document.getElementById("ro-" + k);
+      if (el) el.innerHTML = '<span class="ro-title">Measured in the preview</span>' + out[k];
+    });
+  }
+  function row(label, value) { return "<div>" + label + ": " + value + "</div>"; }
+  function firstFont(f) { return (f || "").split(",")[0].replace(/["']/g, "").trim(); }
+  function ruleLabel(c) {
+    var r = c.r, where = r.kind === "link" ? " in cafe.css" : r.kind === "block" ? " in the &lt;style&gt; block" : "";
+    var later = (r.id === "price2") ? " (the later one)" : (r.id === "price1" && S.rules.price2.on) ? " (the first one)" : "";
+    return "<code>" + esc(r.sel) + "</code>" + later + where;
+  }
+  function winLine(prop, list, computed, none) {
+    if (!list.length) return '<div>Winning rule for <b>' + prop + '</b>: nobody — ' + none + ' → <code>' + computed + '</code></div>';
+    var w = list[0], why = list.length > 1
+      ? (cmpSpec(w.spec, list[1].spec) > 0 ? " — " + kindName(w.spec) + " beats " + kindName(list[1].spec) : " — same strength, so the later rule wins")
+      : " — the only rule that sets it";
+    return '<div>Winning rule for <b>' + prop + '</b>: ' + ruleLabel(w) + ' → <code>' + esc(w.v) + '</code> (' + computed + ')' + why + '</div>';
+  }
+  function rankHtml(list, prop) {
+    if (list.length < 2) return "";
+    return '<div>' + prop + ' rules on the price, strongest first: ' + list.map(function (c, i) {
+      return (i === 0 ? '<span class="badge win">wins</span> ' : '<span class="badge">loses</span> ') + ruleLabel(c);
+    }).join(" · ") + '</div>';
+  }
+  function markLosers(list, prop) {
+    ["p", "price1", "special", "price2"].forEach(function (rid) {
+      var r = BY_ID[rid];
+      r.decls.forEach(function (d, i) {
+        if (d.p !== prop) return;
+        var rowEl = document.getElementById("row-" + rid + "-" + i);
+        if (!rowEl) return;
+        var badge = rowEl.querySelector(".lose-badge");
+        var idx = -1;
+        list.forEach(function (c, k) { if (c.r === r && c.i === i) idx = k; });
+        var loses = idx > 0, wins = idx === 0 && list.length > 1;
+        rowEl.classList.toggle("loses", loses);
+        badge.hidden = !(loses || wins);
+        badge.className = "badge lose-badge" + (wins ? " win" : "");
+        badge.textContent = wins ? "wins on the price" : "overridden";
+      });
+    });
+  }
+  // The box's numbers. Border widths come from the CSS we wrote: on scaled screens (125%, 150%)
+  // the browser snaps borders to whole screen pixels, so 4px can measure as 3.33px.
+  function boxNumbers(c) {
+    var n = function (v) { return round(parseFloat(v) || 0); };
+    var b = { pl: n(c.paddingLeft), pr: n(c.paddingRight), pt: n(c.paddingTop), pb: n(c.paddingBottom) };
+    var bi = 2, bst = S.decls.boxdemo[bi];
+    var bw = (S.rules.boxdemo.on && bst.on) ? bst.n : n(c.borderLeftWidth);
+    b.bl = b.br = b.bt = b.bb = bw;
+    var w = n(c.width), h = n(c.height);
+    if (c.boxSizing === "border-box") {
+      b.total = w; b.cw = round(w - b.pl - b.pr - 2 * bw); b.ch = round(h - b.pt - b.pb - 2 * bw);
+    } else {
+      b.cw = w; b.ch = h; b.total = round(w + b.pl + b.pr + 2 * bw);
+    }
+    return b;
+  }
+  function boxModelHtml(c) {
+    var n = function (v) { return round(parseFloat(v) || 0); };
+    var B = boxNumbers(c);
+    var cw = B.cw, ch = B.ch, pl = B.pl, pr = B.pr, pt = B.pt, pb = B.pb, bl = B.bl, br = B.br, bt = B.bt, bb = B.bb;
+    var total = B.total;
+    var h = '<div class="bm-wrap" aria-label="Box model diagram">' +
+      layer("margin", n(c.marginTop), n(c.marginRight), n(c.marginBottom), n(c.marginLeft),
+        layer("border", bt, br, bb, bl,
+          layer("padding", pt, pr, pb, pl,
+            '<div class="bm content">' + cw + ' × ' + ch + '<br><span style="font-weight:400;font-family:var(--sans);font-size:.75rem">content</span></div>'))) +
+      '</div>';
+    h += '<div class="formula">Width on screen: <b>' + total + 'px</b> = ' + cw + ' content + ' + pl + ' + ' + pr + ' padding + ' + bl + ' + ' + br + ' border.' +
+      (c.boxSizing === "border-box"
+        ? ' With <code>box-sizing: border-box</code> the padding and border fit <b>inside</b> the width you set.'
+        : ' With <code>box-sizing: content-box</code> (no reset) the padding and border are added <b>on top</b> of the width you set.') + '</div>';
+    return h;
+  }
+  function layer(name, t, r, b, l, inner) {
+    return '<div class="bm ' + name + '"><span class="lbl">' + name + '</span><span class="t">' + t + '</span><span class="l">' + l + '</span><div class="in">' + inner + '</div><span class="r">' + r + '</span><span class="b">' + b + '</span></div>';
+  }
+
+  /* ================= the code panel ================= */
+  function renderSections() {
+    var host = $("#sections");
+    host.innerHTML = "";
+    SECTIONS.forEach(function (sec) {
+      var el = document.createElement("section");
+      el.className = "sec";
+      el.id = "sec-" + sec.id;
+      el.setAttribute("aria-labelledby", "h-" + sec.id);
+      var h = '<h2 id="h-' + sec.id + '"><span class="num">' + sec.num + '</span>' + sec.title + '</h2><p class="intro">' + sec.intro + '</p>' + (sec.extra || "");
+      sec.rules.forEach(function (r) { h += ruleHtml(r); });
+      h += '<div class="readout" id="ro-' + sec.id + '" aria-live="polite"></div>';
+      el.innerHTML = h;
+      host.appendChild(el);
+    });
+  }
+
+  function ruleHtml(r) {
+    var on = S.rules[r.id].on;
+    var h = '<div class="rule' + (on ? '' : ' off') + '" id="rule-' + r.id + '">';
+    h += '<div class="cmt">/* ' + esc(r.cmt) + (r.file ? ' — ' + r.file : '') + ' */</div>';
+    var ruleLabelTxt;
+    if (r.kind === "inline") {
+      ruleLabelTxt = '<span class="punc">&lt;</span><span class="tagname">p</span> <span class="attr">class</span>=<span class="val">"tagline"</span> <span class="attr">style</span>=<span class="val">"</span>';
+    } else if (r.kind === "block") {
+      ruleLabelTxt = '<span class="punc">&lt;</span><span class="tagname">style</span><span class="punc">&gt;</span> <span class="sel">' + esc(r.sel) + '</span> <span class="punc">{</span>';
+    } else if (r.kind === "link") {
+      ruleLabelTxt = '<span class="punc">&lt;</span><span class="tagname">link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"cafe.css"</span><span class="punc">&gt;</span>';
+    } else {
+      ruleLabelTxt = '<span class="sel">' + esc(r.sel) + '</span> <span class="punc">{</span>';
+    }
+    h += '<div class="rule-head"><label class="tick"><input type="checkbox" data-act="rule" data-rule="' + r.id + '"' + (on ? ' checked' : '') + ' aria-label="Whole rule ' + esc(r.kind === "css" ? r.sel : r.cmt) + '"><span class="code">' + ruleLabelTxt + '</span></label>' +
+      (r.kind === "link" ? '<span class="badge sim">Simulated file</span>' : '') + '</div>';
+
+    var declHtml = '<div class="decls">';
+    r.decls.forEach(function (d, i) { declHtml += declRowHtml(r, i); });
+    declHtml += '</div>';
+
+    if (r.kind === "link") {
+      h += '<div class="file-tab">cafe.css</div><div class="file-body"><div class="rule-head" style="padding-left:6px"><span class="code"><span class="sel">' + esc(r.sel) + '</span> <span class="punc">{</span></span></div>' + declHtml +
+        '<div class="rule-foot" style="padding-left:6px"><span class="code punc">}</span></div></div>' +
+        '<div class="cmt">Simulated: this game is one single file, so cafe.css is packed inside the link\'s address (a data: URL). The browser still loads it as a real linked stylesheet.</div>';
+    } else {
+      h += declHtml;
+      var foot = r.kind === "inline" ? '<span class="val">"</span><span class="punc">&gt;</span>Flat whites, momos… <span class="punc">&lt;/</span><span class="tagname">p</span><span class="punc">&gt;</span>'
+        : r.kind === "block" ? '<span class="punc">}</span> <span class="punc">&lt;/</span><span class="tagname">style</span><span class="punc">&gt;</span>'
+        : '<span class="punc">}</span>';
+      h += '<div class="rule-foot"><span class="code">' + foot + '</span></div>';
+    }
+    return h + '</div>';
+  }
+
+  function declRowHtml(r, i) {
+    var d = r.decls[i], st = S.decls[r.id][i], key = r.id + "-" + i;
+    var h = '<div class="decl' + (st.on ? '' : ' off') + '" id="row-' + key + '">';
+    h += '<label class="tick"><input type="checkbox" data-act="decl" data-rule="' + r.id + '" data-i="' + i + '"' + (st.on ? ' checked' : '') + '>' +
+      '<span class="code"><span class="prop">' + d.p + '</span><span class="punc">:</span> <span class="val" id="val-' + key + '">' + esc(st.v) + '</span><span class="punc">;</span></span></label>';
+    h += '<span class="badge lose-badge" hidden></span>';
+    if (d.slider || d.choices || d.color) {
+      h += '<span class="ctrl">';
+      if (d.color) h += '<input class="swatch" type="color" data-act="color" data-rule="' + r.id + '" data-i="' + i + '" value="' + toHex(st.v) + '" aria-label="Pick a colour for ' + d.p + ' in ' + esc(r.sel) + '">';
+      if (d.slider) h += '<input type="range" data-act="slide" data-rule="' + r.id + '" data-i="' + i + '" min="' + d.slider.min + '" max="' + d.slider.max + '" step="1" value="' + st.n + '" aria-label="' + d.p + ' value in pixels for ' + esc(r.sel) + '">';
+      if (d.choices) {
+        h += '<select data-act="choose" data-rule="' + r.id + '" data-i="' + i + '" aria-label="Choose a value for ' + d.p + ' in ' + esc(r.sel) + '">';
+        d.choices.forEach(function (c) { h += '<option' + (c === st.v ? ' selected' : '') + '>' + esc(c) + '</option>'; });
+        h += '</select>';
+      }
+      h += '</span>';
+    }
+    return h + '</div>';
+  }
+
+  function pulse(el) {
+    if (!el) return;
+    el.classList.remove("changed");
+    void el.offsetWidth;
+    el.classList.add("changed");
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove("changed"); }, 1400);
+  }
+
+  /* ================= "What just happened" ================= */
+  function where(r) {
+    if (r.kind === "inline") return "the inline <code>style=\"\"</code> on the tagline";
+    if (r.kind === "block") return "the <code>&lt;style&gt;</code> block";
+    if (r.kind === "link") return "<code>.site-footer</code> in the linked file cafe.css";
+    return "<code>" + esc(r.sel) + "</code>";
+  }
+  function explain(html) { $("#explain-body").innerHTML = html; }
+  function p(t, cls) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + t + '</p>'; }
+
+  function explainRule(r, on) {
+    var what;
+    if (r.kind === "inline") what = on ? "You put the inline <code>style=\"…\"</code> back on the tagline." : "You removed the inline <code>style=\"…\"</code> from the tagline.";
+    else if (r.kind === "block") what = on ? "You put the <code>&lt;style&gt;</code> block back in the &lt;head&gt;." : "You removed the <code>&lt;style&gt;</code> block from the &lt;head&gt;.";
+    else if (r.kind === "link") what = on ? "You linked <code>cafe.css</code> again." : "You unlinked <code>cafe.css</code> (like deleting the &lt;link&gt; line).";
+    else what = "You switched " + (on ? "<b>on</b>" : "<b>off</b>") + " the whole rule <code>" + esc(r.sel) + " { … }</code>.";
+    var effect = on ? "All its ticked lines work again." : (r.offRule || "Every line inside it stops working at once — the browser's defaults (or weaker rules) show through.");
+    explain(p(what) + p(effect) + p(r.why, "use"));
+  }
+  function explainDecl(r, i, on) {
+    var d = r.decls[i], st = S.decls[r.id][i];
+    var line = "<code>" + d.p + ": " + esc(st.v) + ";</code>";
+    var what = "You switched " + (on ? "<b>on</b> " : "<b>off</b> ") + line + " in " + where(r) + ".";
+    if (!S.rules[r.id].on) {
+      explain(p(what) + p("But the whole rule is switched off, so this line does nothing yet. Tick the rule's top line to switch it back on."));
+      return;
+    }
+    explain(p(what) + p(on ? d.does : d.off) + p(r.why, "use"));
+  }
+  function explainValue(r, i) {
+    var d = r.decls[i], st = S.decls[r.id][i];
+    var what = "You changed <code>" + d.p + "</code> in " + where(r) + " to <code>" + esc(st.v) + "</code>.";
+    var extra = d.slide || d.does;
+    if (d.color) extra = "That's a hex colour: #RRGGBB. The colour picker always writes hex. " + (d.slide || "");
+    var note = (!S.rules[r.id].on || !st.on) ? p("This line is switched off, so you won't see the change until you tick it.") : "";
+    explain(p(what) + p(extra) + note);
+  }
+
+  /* ================= events ================= */
+  var host = $("#sections");
+  host.addEventListener("change", function (e) {
+    var t = e.target, act = t.getAttribute("data-act");
+    if (!act) return;
+    var r = BY_ID[t.getAttribute("data-rule")], i = +t.getAttribute("data-i");
+    if (act === "rule") {
+      S.rules[r.id].on = t.checked;
+      $("#rule-" + r.id).classList.toggle("off", !t.checked);
+      pulse($("#rule-" + r.id));
+      explainRule(r, t.checked);
+      applyInPlace(function () { flashPreview(flashSel(r)); });
+    } else if (act === "decl") {
+      S.decls[r.id][i].on = t.checked;
+      var rowEl = $("#row-" + r.id + "-" + i);
+      rowEl.classList.toggle("off", !t.checked);
+      pulse(rowEl);
+      explainDecl(r, i, t.checked);
+      applyInPlace(function () { flashPreview(flashSel(r)); });
+    } else if (act === "choose" || act === "color") {
+      setValue(r, i, t.value);
+      explainValue(r, i);
+      applyInPlace(function () { flashPreview(flashSel(r)); });
+    } else if (act === "slide") {
+      explainValue(r, i);
+      flashPreview(flashSel(r));
+    }
+  });
+  host.addEventListener("input", function (e) {
+    var t = e.target, act = t.getAttribute("data-act");
+    if (act !== "slide" && act !== "color") return;
+    var r = BY_ID[t.getAttribute("data-rule")], i = +t.getAttribute("data-i");
+    if (act === "slide") {
+      var d = r.decls[i];
+      S.decls[r.id][i].n = +t.value;
+      setValue(r, i, d.slider.tpl.replace("{n}", t.value));
+    } else {
+      setValue(r, i, t.value);
+    }
+    applyInPlace();
+  });
+  function setValue(r, i, v) {
+    S.decls[r.id][i].v = v;
+    var key = r.id + "-" + i;
+    $("#val-" + key).textContent = v;
+    pulse($("#row-" + key));
+  }
+
+  $("#reset-all").addEventListener("click", function () {
+    S = freshState();
+    renderSections();
+    loadPreview();
+    explain(p("Everything is back to the start: every rule is switched on, with its first value.") + p("Untick any line to see what it was doing."));
+  });
+
+  /* ================= "Now type it" challenges ================= */
+  var CH_BASE = "*{margin:0;box-sizing:border-box} body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#35231a;background:#fbf6ea;padding:14px;line-height:1.5} h1,h2,h3{font-family:Georgia,serif}";
+  var CARD_CSS = ".card{background:#fff;border:2px solid #e8dcc6;max-width:260px} .card h3{margin-bottom:4px}";
+  var CHALLENGES = [
+    {
+      title: "Make the price gold — with a hex colour",
+      task: "Wattle gold is <code>#d18f00</code>. Type a <code>color</code> declaration between the braces.",
+      html: '<p class="price" style="font-size:1.4rem;font-weight:700">Only $6.00 today</p>',
+      css: CH_BASE,
+      start: ".price {\n  \n}",
+      check: function (d, w, text) {
+        var c = rgb(w.getComputedStyle(d.querySelector(".price")).color);
+        var hex = /#[0-9a-f]{3,8}\b/i.test(text);
+        var gold = c && c[0] >= 160 && c[1] >= 100 && c[1] <= 215 && c[2] <= 110 && c[0] - c[2] >= 90;
+        if (/colour\s*:/i.test(text)) return no("CSS uses the American spelling: <code>color</code>, not colour. Try <code>color: #d18f00;</code>");
+        if (gold && hex) return yes("Nice — that's gold, written as a hex colour. Lots of red, some green, almost no blue.");
+        if (gold) return no("Close! It's gold, but not written in hex. Use a # code, like <code>#d18f00</code>.");
+        if (hex && c && !(c[0] === 53 && c[1] === 35 && c[2] === 26)) return no("That's a hex colour, but it's not gold. Gold has lots of red, some green and little blue: try <code>#d18f00</code>.");
+        return no("Hint: inside the braces type <code>color: #d18f00;</code> — property, colon, value, semicolon.");
+      }
+    },
+    {
+      title: "Give the card 20px of padding",
+      task: "Padding is the space <b>inside</b> the card's border. Give all four sides 20px.",
+      html: '<div class="card"><h3>Flat White</h3><p>Smooth and strong, Melbourne style.</p><b>$5.50</b></div>',
+      css: CH_BASE + CARD_CSS,
+      start: ".card {\n  \n}",
+      check: function (d, w) {
+        var c = w.getComputedStyle(d.querySelector(".card"));
+        var sides = [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft].map(parseFloat);
+        var twenty = sides.filter(function (x) { return Math.abs(x - 20) < 0.5; }).length;
+        if (twenty === 4) return yes("Nice — 20px of space inside the card, on all four sides. That's padding.");
+        if (twenty > 0) return no("Almost — only some sides have 20px. <code>padding: 20px;</code> does all four at once.");
+        if (Math.abs(parseFloat(c.marginTop) - 20) < 0.5) return no("That's <b>margin</b> — space OUTSIDE the border. You want <b>padding</b>, space INSIDE.");
+        if (sides.some(function (x) { return x > 0; })) return no("You've added padding, but not 20px. Try <code>padding: 20px;</code>");
+        return no("Hint: <code>padding: 20px;</code> — and don't forget the <code>px</code>.");
+      }
+    },
+    {
+      title: "Make the card's corners round",
+      task: "Right now the corners are sharp. Make them round.",
+      html: '<div class="card" style="padding:16px"><h3>Chicken Momo</h3><p>Steamed dumplings with tomato achar.</p><b>$16.00</b></div>',
+      css: CH_BASE + CARD_CSS,
+      start: ".card {\n  \n}",
+      check: function (d, w) {
+        var c = w.getComputedStyle(d.querySelector(".card"));
+        var r = [c.borderTopLeftRadius, c.borderTopRightRadius, c.borderBottomLeftRadius, c.borderBottomRightRadius].map(parseFloat);
+        var n = r.filter(function (x) { return x > 0; }).length;
+        if (n === 4) return yes("Nice — round corners! <code>border-radius</code> rounds them. A huge value like 999px makes a pill.");
+        if (n > 0) return no("Some corners are round, but not all four. <code>border-radius: 16px;</code> rounds all of them.");
+        return no("Hint: the property is <code>border-radius</code>. Try <code>border-radius: 16px;</code>");
+      }
+    },
+    {
+      title: "Centre the heading",
+      task: "Move the café name to the middle of the page.",
+      html: '<h1>Wattle &amp; Chai</h1><p>Flat whites, momos and good company.</p>',
+      css: CH_BASE,
+      start: "h1 {\n  \n}",
+      check: function (d, w, text) {
+        var c = w.getComputedStyle(d.querySelector("h1"));
+        if (c.textAlign === "center" || c.textAlign === "-webkit-center") return yes("Nice — the heading is centred. <code>text-align: center;</code> centres text inside its box.");
+        if (/centre/i.test(text)) return no("So close! CSS uses the American spelling: <code>center</code>, not centre.");
+        if (/text-align/i.test(text)) return no("You found the right property. Now the value: <code>text-align: center;</code>");
+        return no("Hint: the property is <code>text-align</code>. Try <code>text-align: center;</code>");
+      }
+    },
+    {
+      title: "Make the menu a 3-column grid",
+      task: "Six menu items are stacked. Put them in a grid with three columns.",
+      html: '<div class="menu"><div class="item">Flat White</div><div class="item">Long Black</div><div class="item">Masala Chai</div><div class="item">Chicken Momo</div><div class="item">Lamington</div><div class="item">Meat Pie</div></div>',
+      css: CH_BASE + ".item{background:#fff;border:2px solid #e8dcc6;border-radius:10px;padding:8px;margin-bottom:6px;text-align:center}",
+      start: ".menu {\n  \n}",
+      check: function (d, w) {
+        var c = w.getComputedStyle(d.querySelector(".menu"));
+        var isGrid = c.display.indexOf("grid") >= 0;
+        var cols = isGrid && c.gridTemplateColumns !== "none" ? c.gridTemplateColumns.trim().split(/\s+/).length : (isGrid ? 1 : 0);
+        if (isGrid && cols === 3) return yes("Nice — a 3-column grid! <code>repeat(3, 1fr)</code> means three equal columns.");
+        if (isGrid) return no("It's a grid now, with " + cols + " column" + (cols === 1 ? "" : "s") + ". Add <code>grid-template-columns: repeat(3, 1fr);</code>");
+        if (c.display.indexOf("flex") >= 0) return no("That's Flexbox — close, but this one wants Grid: <code>display: grid;</code>");
+        return no("Hint: start with <code>display: grid;</code> then <code>grid-template-columns: repeat(3, 1fr);</code>");
+      }
+    }
+  ];
+  function yes(m) { return { ok: true, msg: "✓ " + m }; }
+  function no(m) { return { ok: false, msg: /^(Close|Almost|So close)/.test(m) ? m : "Not yet — " + m }; }
+  function rgb(s) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(s || ""); return m ? [+m[1], +m[2], +m[3]] : null; }
+
+  function renderChallenges() {
+    var list = $("#ch-list");
+    CHALLENGES.forEach(function (ch, k) {
+      var art = document.createElement("article");
+      art.className = "challenge";
+      art.innerHTML = '<h3>' + (k + 1) + '. ' + ch.title + '</h3><p class="task">' + ch.task + '</p>' +
+        '<div class="ch-grid"><div><label for="ch-ta-' + k + '">Your CSS</label><textarea id="ch-ta-' + k + '" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>' +
+        '<div><span style="font-weight:600;font-size:.9rem;display:block;margin-bottom:4px">Live preview</span><iframe title="Preview for challenge ' + (k + 1) + '"></iframe></div></div>' +
+        '<div class="ch-actions"><button class="btn primary" type="button">Check it</button><button class="btn" type="button">Start again</button><p class="feedback" aria-live="polite"></p></div>';
+      list.appendChild(art);
+      var ta = art.querySelector("textarea"), fr = art.querySelector("iframe"), fb = art.querySelector(".feedback");
+      var buttons = art.querySelectorAll("button");
+      ta.value = ch.start;
+      var loaded = false;
+      fr.onload = function () { loaded = true; update(); };
+      fr.srcdoc = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>' + ch.css + '</style><style id="student"></style></head><body>' + ch.html + '</body></html>';
+      function update() {
+        if (!loaded) return;
+        fr.contentDocument.getElementById("student").textContent = ta.value;
+      }
+      ta.addEventListener("input", function () { update(); if (fb.textContent) { fb.textContent = ""; fb.className = "feedback"; } });
+      buttons[0].addEventListener("click", function () {
+        if (!loaded) return;
+        update();
+        var res = ch.check(fr.contentDocument, fr.contentWindow, ta.value);
+        fb.innerHTML = res.msg;
+        fb.className = "feedback " + (res.ok ? "ok" : "no");
+      });
+      buttons[1].addEventListener("click", function () {
+        ta.value = ch.start; update(); fb.textContent = ""; fb.className = "feedback"; ta.focus();
+        ta.selectionStart = ta.selectionEnd = ch.start.indexOf("\n  ") + 3;
+      });
+    });
+  }
+
+  /* ================= start ================= */
+  renderSections();
+  renderChallenges();
+  loadPreview();
+})();
+</script>
+</body>
+</html>
